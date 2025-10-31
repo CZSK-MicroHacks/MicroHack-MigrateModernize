@@ -92,7 +92,7 @@ param (
     #Know more about SAS here: https://docs.microsoft.com/en-us/Az.Storage/storage-dotnet-shared-access-signature-part-1
     [Parameter()][int]$SasExpiryDuration = 28800,
     #Provide storage account key. If not provided current user authentication will be used.
-    [Parameter()][string]$StorageAccountKey = "ZTdn7SiArYvyWILXs/elCghCKWb1XCKqi4fUfs6CTmGOgr1BxiAEtQYafAD4eaqvfa2I5TI1n5FP+AStYXqp/Q==",
+    [Parameter(Mandatory=$true)][string]$StorageAccountKey,
     #Provide storage account name where you want to copy the disk image.
     [Parameter()][string]$StorageAccountName = "crgarciamigrateresources",
     #Name of the storage container where the downloaded disk image will be stored

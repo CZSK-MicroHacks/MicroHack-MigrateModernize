@@ -40,5 +40,5 @@ variable "admin_password" {
 variable "artifacts_location" {
   description = "The base URI where artifacts required by this template are located including a trailing '/'"
   type        = string
-  default     = "https://raw.githubusercontent.com/crgarcia12/azure-migrate-env/main/"
+  default     = "https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/main/vm-creation-infra"
 }
