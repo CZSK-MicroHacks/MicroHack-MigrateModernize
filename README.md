@@ -1,9 +1,3 @@
-# Carlos notes
-This lab requires sandard security type in VMs (not trusted launch):
-```
-az feature register --name UseStandardSecurityType --namespace Microsoft.Compute
-az feature show --name UseStandardSecurityType --namespace Microsoft.Compute
-```
 
 
 # Azure Hyper-V Infrastructure

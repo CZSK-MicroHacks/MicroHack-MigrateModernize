@@ -6,33 +6,45 @@ To begin, log into the virtual machine using the following credentials:
 Username: +++@lab.VirtualMachine(Win11-Pro-Base).Username+++
 Password: +++@lab.VirtualMachine(Win11-Pro-Base).Password+++
 
-**Note:** Text formatted as an +++example+++ represents type text. Clicking on this text will automatically insert it to prevent any typing errors.
+===
+# Lab initial setup
+This lab requires some initial setup to ensure that all necessary tools and configurations are in place. Follow the steps below to prepare your environment:
 
-To edit the lab manual, click the hamburger menu in the top-right corner and select **"Edit Instructions"**. This will open the editor where you can modify the instructions.
+Open The Azure Portal using the credentials in 
+Upload the file
+Login to Github enterprise: https://github.com/enterprises/skillable-events
 
-Instructions are written in Markdown. For detailed guidance on syntax, please refer to the following documentation:
-
-[Creating Instructions with Markdown Syntax](https://docs.skillable.com/docs/creating-instructions-with-markdown-syntax)
-
-If you want to manage your instructions outside of Skillable Studio like Github, please refer to the following documentation:
-
-[Manage Instructions Outside of Studio](https://docs.skillable.com/docs/manage-instructions-outside-of-studio)
-
-For saving changes made to the virtual machine, please refer to this guide:  
-
-[Committing Changes to a Virtual Machine](https://docs.skillable.com/docs/committing-changes-to-a-lab)
-
-**Note:** When prompted, select **"Commit my changes and update this lab profile"** to ensure your changes are saved.
-
-Changes made to the virtual machine will take effect immediately after committing. You may restart the lab instance if you wish to view these changes.
-
-**Note:** Changes to the instructions will be saved automatically, so the commit process applies only to modifications to the virtual machine.
-
-Should you require any assistance, feel free to contact us.
 
 ===
 
-# What is GitHub Copilot app modernization?
+# What are we going to do today?
+
+This lab has two main parts:
+Part 1: Prepare a migration:
+1. An assessment of an on-premises datacenter hyper-v environment using Azure Migrate
+1. Building a Business Case and decide on the next step for one application
+
+Part 2: Migrate an application:
+1. Modernize .NET application |using GitHub Copilot app modernization for .NET.
+1. Build a pipeline to deploy the application to Azure
+
+Each part is independent.
+
+===
+
+# Part 1: Prepare a migration
+## Assess an on-premises datacenter using Azure Migrate
+### Understand our lab environment
+
+The lab simulates a datacenter, by having a VM hosting server, and several VMs inside simulating different applications
+![alt text](media/00.png)
+1. [] Open Edge, and go to the Azure Portal. Use the following link to access preview features: +++http://aka.ms/migrate/disconnectedAppliance+++
+1. [] find the on-prem resource group. 
+
+===
+
+===
+
 
 GitHub Copilot app modernization is a GitHub Copilot agent that helps upgrade projects to newer versions of .NET and migrate .NET applications to Azure quickly and confidently by guiding you through assessment, solution recommendations, code fixes, and validation - all within Visual Studio.
 
