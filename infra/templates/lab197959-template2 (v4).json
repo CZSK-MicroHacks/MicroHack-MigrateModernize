@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "7964010771588782434"
+      "templateHash": "1801975927509926377"
     }
   },
   "parameters": {
@@ -21,13 +21,6 @@
       "defaultValue": "swedencentral",
       "metadata": {
         "description": "Location for all resources."
-      }
-    },
-    "vmPassword": {
-      "type": "securestring",
-      "defaultValue": "demo!pass123",
-      "metadata": {
-        "description": "VM Password"
       }
     },
     "prefix": {
@@ -1061,12 +1054,6 @@
           "vmSize": {
             "value": "Standard_E32as_v5"
           },
-          "adminUsername": {
-            "value": "adminuser"
-          },
-          "adminPassword": {
-            "value": "[parameters('vmPassword')]"
-          },
           "networkInterfaceIds": {
             "value": [
               "[reference(resourceId('Microsoft.Resources/deployments', 'deploy-nic-primary'), '2022-09-01').outputs.nicId.value]",
@@ -1082,14 +1069,10 @@
           "dataDisks": {
             "value": [
               {
+                "lun": 0,
                 "name": "[format('{0}-disk1', variables('vmName'))]",
-                "createOption": "Empty",
-                "diskSizeGB": 1024,
-                "storageAccountType": "Standard_LRS",
-                "caching": "ReadOnly",
-                "imageReference": {
-                  "communityGalleryImageId": "CommunityGalleries/crgardemogallery-3167aeab-db3a-49f3-a41b-52b828f29a3c/Images/migrate-lab-0.0.4/Versions/latest"
-                }
+                "createOption": "FromImage",
+                "caching": "None"
               }
             ]
           },
@@ -1122,7 +1105,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.18.4.5664",
-              "templateHash": "6155868417354153081"
+              "templateHash": "7846837162175128638"
             }
           },
           "parameters": {
@@ -1142,22 +1125,9 @@
             },
             "vmSize": {
               "type": "string",
-              "defaultValue": "Standard_E32as_v5",
+              "defaultValue": "Standard_E16_v5",
               "metadata": {
                 "description": "The size of the virtual machine"
-              }
-            },
-            "adminUsername": {
-              "type": "string",
-              "defaultValue": "adminuser",
-              "metadata": {
-                "description": "The admin username"
-              }
-            },
-            "adminPassword": {
-              "type": "securestring",
-              "metadata": {
-                "description": "The admin password"
               }
             },
             "networkInterfaceIds": {
@@ -1244,19 +1214,17 @@
                       "name": "dataDisks",
                       "count": "[length(parameters('dataDisks'))]",
                       "input": {
-                        "lun": "[copyIndex('dataDisks')]",
+                        "lun": "[parameters('dataDisks')[copyIndex('dataDisks')].lun]",
                         "name": "[parameters('dataDisks')[copyIndex('dataDisks')].name]",
                         "createOption": "[parameters('dataDisks')[copyIndex('dataDisks')].createOption]",
-                        "diskSizeGB": "[parameters('dataDisks')[copyIndex('dataDisks')].diskSizeGB]",
-                        "managedDisk": {
-                          "storageAccountType": "[parameters('dataDisks')[copyIndex('dataDisks')].storageAccountType]"
-                        },
+                        "diskSizeGB": "[if(contains(parameters('dataDisks')[copyIndex('dataDisks')], 'diskSizeGB'), parameters('dataDisks')[copyIndex('dataDisks')].diskSizeGB, null())]",
+                        "managedDisk": "[if(contains(parameters('dataDisks')[copyIndex('dataDisks')], 'storageAccountType'), createObject('storageAccountType', parameters('dataDisks')[copyIndex('dataDisks')].storageAccountType), null())]",
                         "caching": "[parameters('dataDisks')[copyIndex('dataDisks')].caching]"
                       }
                     }
                   ],
                   "imageReference": {
-                    "communityGalleryImageId": "/subscriptions/96c2852b-cf88-4a55-9ceb-d632d25b83a4/resourceGroups/crgar-vm-gallery/providers/Microsoft.Compute/galleries/crgarvmgallery/images/migrate-lab-0.0.4/versions/0.0.4"
+                    "communityGalleryImageId": "/CommunityGalleries/crgardemogallery-3167aeab-db3a-49f3-a41b-52b828f29a3c/Images/migrate-lab-0.0.4/Versions/0.0.4"
                   },
                   "osDisk": {
                     "name": "[parameters('osDiskName')]",
