@@ -2,11 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
-    "_generator": {
-      "name": "bicep",
-      "version": "0.18.4.5664",
-      "templateHash": "7964010771588782434"
-    }
   },
   "parameters": {
     "artifactsLocation": {
@@ -16,14 +11,7 @@
         "description": "The base URI where artifacts required by this template are located including a trailing /"
       }
     },
-    "location": {
-      "type": "string",
-       "defaultValue": "swedencentral",
-      //"defaultValue": "@lab.DeliveryRegionName",
-      "metadata": {
-        "description": "Location for all resources."
-      }
-    },
+
     "prefix": {
       "type": "string",
       "defaultValue": "lab@lab.LabInstance.ID",
@@ -35,9 +23,6 @@
   },
   "variables": {
     "vnetName": "[format('{0}-vnet', parameters('prefix'))]",
-    "addressSpaces": [
-      "172.100.0.0/17"
-    ],
     "vmName": "[format('{0}-vm', parameters('prefix'))]",
     "subnets": [
       {
@@ -65,7 +50,6 @@
         "privateIp": ""
       }
     ],
-    "ghostedSubnetAddressPrefix": "[variables('subnets')[2].addressPrefix]",
     "nsgRules": {
       "nat-nsg": [
         {
@@ -95,11 +79,7 @@
       ],
       "ghosted-nsg": [],
       "azurevms-nsg": []
-    },
-    "dscInstallWindowsFeaturesUri": "[format('{0}scripts/dscinstallwindowsfeatures.zip', parameters('artifactsLocation'))]",
-    "hvHostSetupScriptUri": "[format('{0}scripts/hvhostsetup.ps1', parameters('artifactsLocation'))]",
-    "applianceName": "offlinecollector",
-    "projectName": "[format('{0}-prj', parameters('prefix'))]"
+    }
   },
   "resources": [
     {
@@ -139,10 +119,10 @@
             "value": "[variables('vnetName')]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "addressSpaces": {
-            "value": "[variables('addressSpaces')]"
+            "value": ["172.100.0.0/17"]
           },
           "subnets": {
             "copy": [
@@ -288,7 +268,7 @@
             "value": "[format('{0}-{1}', variables('vmName'), variables('subnets')[copyIndex()].nsgName)]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "securityRules": {
             "value": "[variables('nsgRules')[variables('subnets')[copyIndex()].nsgName]]"
@@ -403,7 +383,7 @@
             "value": "[format('{0}-ip', variables('vmName'))]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "allocationMethod": {
             "value": "Static"
@@ -513,7 +493,7 @@
             "value": "[replace(format('{0}-diag', parameters('prefix')), '-', '')]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "skuName": {
             "value": "Standard_LRS"
@@ -629,13 +609,13 @@
             "value": "[format('udr-{0}-azurevms', variables('vnetName'))]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "routes": {
             "value": [
               {
                 "name": "Nested-VMs",
-                "addressPrefix": "[variables('ghostedSubnetAddressPrefix')]",
+                "addressPrefix": "172.100.2.0/24",
                 "nextHopType": "VirtualAppliance",
                 "nextHopIpAddress": "172.100.1.4"
               }
@@ -741,7 +721,7 @@
             "value": "[format('{0}-nic-primary', variables('vmName'))]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "subnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy-vnet'), '2022-09-01').outputs.subnets.value[0].id]"
@@ -899,7 +879,7 @@
             "value": "[format('{0}-nic-secondary', variables('vmName'))]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "subnetId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy-vnet'), '2022-09-01').outputs.subnets.value[1].id]"
@@ -1053,16 +1033,10 @@
             "value": "[variables('vmName')]"
           },
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
           "vmSize": {
             "value": "Standard_E32as_v5"
-          },
-          "adminUsername": {
-            "value": "adminuser"
-          },
-          "adminPassword": {
-            "value": "[parameters('vmPassword')]"
           },
           "networkInterfaceIds": {
             "value": [
@@ -1088,24 +1062,6 @@
           },
           "bootDiagnosticsStorageUri": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', 'deploy-storage'), '2022-09-01').outputs.primaryBlobEndpoint.value]"
-          },
-          "dscConfiguration": {
-            "value": {
-              "wmfVersion": "latest",
-              "configuration": {
-                "url": "[variables('dscInstallWindowsFeaturesUri')]",
-                "script": "DSCInstallWindowsFeatures.ps1",
-                "function": "InstallWindowsFeatures"
-              }
-            }
-          },
-          "customScriptExtension": {
-            "value": {
-              "fileUris": [
-                "[variables('hvHostSetupScriptUri')]"
-              ],
-              "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -File hvhostsetup.ps1 -NIC1IPAddress {0} -NIC2IPAddress {1} -GhostedSubnetPrefix {2} -VirtualNetworkPrefix {3}', reference(resourceId('Microsoft.Resources/deployments', 'deploy-nic-primary'), '2022-09-01').outputs.privateIpAddress.value, reference(resourceId('Microsoft.Resources/deployments', 'deploy-nic-secondary'), '2022-09-01').outputs.privateIpAddress.value, variables('ghostedSubnetAddressPrefix'), variables('addressSpaces')[0])]"
-            }
           }
         },
         "template": {
@@ -1138,19 +1094,6 @@
               "defaultValue": "Standard_E32as_v5",
               "metadata": {
                 "description": "The size of the virtual machine"
-              }
-            },
-            "adminUsername": {
-              "type": "string",
-              "defaultValue": "adminuser",
-              "metadata": {
-                "description": "The admin username"
-              }
-            },
-            "adminPassword": {
-              "type": "securestring",
-              "metadata": {
-                "description": "The admin password"
               }
             },
             "networkInterfaceIds": {
@@ -1339,9 +1282,15 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "[parameters('location')]"
+            "value": "[resourceGroup().location]"
           },
-          "name": {
+          "projectName": {
+            "value": "[format('{0}-prj', parameters('prefix'))]"
+          },
+          "applianceName": {
+            "value": "offlinecollector"
+          },
+          "migrateProjectName": {
             "value": "[format('{0}-azm', parameters('prefix'))]"
           }
         },
@@ -1356,10 +1305,22 @@
             }
           },
           "parameters": {
-            "name": {
+            "projectName": {
               "type": "string",
               "metadata": {
-                "description": "Resource name prefix"
+                "description": "Project name for Azure Migrate resources"
+              }
+            },
+            "migrateProjectName": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure Migrate project name"
+              }
+            },
+            "applianceName": {
+              "type": "string",
+              "metadata": {
+                "description": "Appliance name"
               }
             },
             "location": {
@@ -1381,335 +1342,339 @@
             {
               "type": "Microsoft.Migrate/MigrateProjects",
               "apiVersion": "2020-06-01-preview",
-              "name": "[parameters('name')]",
+              "name": "[parameters('migrateProjectName')]",
               "location": "[parameters('location')]",
-              "tags": "[union(parameters('tags'), createObject('Migrate Project', parameters('name')))]",
+              "tags": "[union(parameters('tags'), createObject('Migrate Project', parameters('migrateProjectName')))]",
               "properties": {}
             },
             {
               "type": "Microsoft.Migrate/MigrateProjects/Solutions",
               "apiVersion": "2020-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'Servers-Assessment-ServerAssessment')]",
+              "name": "[format('{0}/{1}', parameters('migrateProjectName'), 'Servers-Assessment-ServerAssessment')]",
               "properties": {
                 "tool": "ServerAssessment",
                 "purpose": "Assessment",
                 "goal": "Servers"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('name'))]"
+                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]"
               ]
             },
             {
               "type": "Microsoft.Migrate/MigrateProjects/Solutions",
               "apiVersion": "2020-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'Servers-Discovery-ServerDiscovery')]",
+              "name": "[format('{0}/{1}', parameters('migrateProjectName'), 'Servers-Discovery-ServerDiscovery')]",
               "properties": {
                 "tool": "ServerDiscovery",
                 "purpose": "Discovery",
                 "goal": "Servers"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('name'))]",
-                "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('name'), 'Servers-Assessment-ServerAssessment')]"
+                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]",
+                "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Assessment-ServerAssessment')]"
               ]
             },
             {
               "type": "Microsoft.Migrate/MigrateProjects/Solutions",
               "apiVersion": "2020-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'Servers-Migration-ServerMigration')]",
+              "name": "[format('{0}/{1}', parameters('migrateProjectName'), 'Servers-Migration-ServerMigration')]",
               "properties": {
                 "tool": "ServerMigration",
                 "purpose": "Migration",
                 "goal": "Servers"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('name'))]",
-                "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('name'), 'Servers-Discovery-ServerDiscovery')]"
+                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]",
+                "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Discovery-ServerDiscovery')]"
               ]
             },
             {
               "type": "Microsoft.Migrate/MigrateProjects/Solutions",
               "apiVersion": "2020-06-01-preview",
-              "name": "[format('{0}/{1}', parameters('name'), 'Servers-Migration-ServerMigration_DataReplication')]",
+              "name": "[format('{0}/{1}', parameters('migrateProjectName'), 'Servers-Migration-ServerMigration_DataReplication')]",
               "properties": {
                 "tool": "ServerMigration_DataReplication",
                 "purpose": "Migration",
                 "goal": "Servers"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('name'))]",
-                "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('name'), 'Servers-Migration-ServerMigration')]"
+                "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]",
+                "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Migration-ServerMigration')]"
               ]
+            },
+            {
+              "type": "Microsoft.OffAzure/VMwareSites",
+              "apiVersion": "2020-07-10",
+              "name": "[concat(parameters('projectName'), 'vmwaresite')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "applianceName": "[parameters('applianceName')]",
+                "servicePrincipalIdentityDetails": {
+                  "tenantId": "tenantId",
+                  "applicationId": "applicationId",
+                  "objectId": "objectId",
+                  "audience": "audience",
+                  "aadAuthority": "aadAuthority"
+                },
+                "discoverySolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Discovery-ServerDiscovery')]"
+              }
+            },
+            {
+              "type": "Microsoft.Migrate/assessmentprojects",
+              "apiVersion": "2020-05-01-preview",
+              "name": "[concat(parameters('projectName'), 'asmproject')]",
+              "location": "[parameters('location')]",
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "projectStatus": "Active",
+                "assessmentSolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Assessment-ServerAssessment')]"
+              }
+            },
+            {
+              "type": "Microsoft.Migrate/assessmentprojects/vmwarecollectors",
+              "apiVersion": "2025-09-09-preview",
+              "name": "[concat(parameters('projectName'), 'asmproject', '/', parameters('projectName'), 'asmprojectvmwarecollector')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Migrate/assessmentprojects', concat(parameters('projectName'), 'asmproject'))]",
+                "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "agentProperties": {
+                  "id": "[reference(resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite')), '2020-07-10').agentDetails.id]",
+                  "spnDetails": {
+                    "authority": "authority",
+                    "applicationId": "appId",
+                    "audience": "audience",
+                    "objectId": "objectid",
+                    "tenantId": "tenantid"
+                  }
+                },
+                "discoverySiteId": "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]"
+              }
+            },
+            {
+              "type": "microsoft.applicationmigration/pgsqlsites",
+              "apiVersion": "2025-02-01-preview",
+              "name": "[concat(parameters('projectName'), 'pgsql')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "properties": {
+                "masterSiteId": "[resourceId('Microsoft.OffAzure/MasterSites', concat(parameters('projectName'), 'mastersite'))]",
+                "migrateProjectId": "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]"
+              }
+            },
+            {
+              "type": "microsoft.mysqldiscovery/mysqlsites",
+              "apiVersion": "2024-12-30-preview",
+              "name": "[concat(parameters('projectName'), 'mysql')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "properties": {
+                "masterSiteId": "[resourceId('Microsoft.OffAzure/MasterSites', concat(parameters('projectName'), 'mastersite'))]",
+                "migrateProjectId": "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]"
+              }
+            },
+            {
+              "type": "Microsoft.OffAzure/MasterSites",
+              "apiVersion": "2020-07-07",
+              "name": "[concat(parameters('projectName'), 'mastersite')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]",
+                "[resourceId('microsoft.applicationmigration/pgsqlsites', concat(parameters('projectName'), 'pgsql'))]",
+                "[resourceId('microsoft.mysqldiscovery/mysqlsites', concat(parameters('projectName'), 'mysql'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "allowMultipleSites": true,
+                "sites": [
+                  "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]",
+                  "[resourceId('microsoft.applicationmigration/pgsqlsites', concat(parameters('projectName'), 'pgsql'))]",
+                  "[resourceId('microsoft.mysqldiscovery/mysqlsites', concat(parameters('projectName'), 'mysql'))]"
+                ]
+              }
+            },
+            {
+              "type": "microsoft.offazure/mastersites/sqlsites",
+              "apiVersion": "2022-10-27",
+              "name": "[concat(parameters('projectName'), 'mastersite/', parameters('projectName'), 'sqlsites')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.OffAzure/MasterSites', concat(parameters('projectName'), 'mastersite'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "discoverySolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Discovery-ServerDiscovery')]",
+                "siteAppliancePropertiesCollection": [
+                  {
+                    "servicePrincipalIdentityDetails": {
+                      "tenantId": "tenantId",
+                      "applicationId": "applicationId",
+                      "objectId": "objectId",
+                      "audience": "audience",
+                      "aadAuthority": "aadAuthority"
+                    },
+                    "applianceName": "[parameters('applianceName')]"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.OffAzure/MasterSites/WebAppSites",
+              "apiVersion": "2020-11-11-preview",
+              "name": "[concat(parameters('projectName'), 'mastersite/', parameters('projectName'), 'webappsite')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.OffAzure/MasterSites', concat(parameters('projectName'), 'mastersite'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "discoverySolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', parameters('migrateProjectName'), 'Servers-Discovery-ServerDiscovery')]",
+                "siteAppliancePropertiesCollection": [
+                  {
+                    "servicePrincipalIdentityDetails": {
+                      "tenantId": "tenantId",
+                      "applicationId": "applicationId",
+                      "objectId": "objectId",
+                      "audience": "audience",
+                      "aadAuthority": "aadAuthority"
+                    },
+                    "applianceName": "[parameters('applianceName')]"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "microsoft.offazure/mastersites/sqlsites/discoverysitedatasources",
+              "apiVersion": "2020-11-11-preview",
+              "name": "[concat(parameters('projectName'), 'mastersite/', parameters('projectName'), 'sqlsites/vmwarediscoverysource')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]",
+                "[resourceId('microsoft.offazure/mastersites/sqlsites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'sqlsites'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "properties": {
+                "discoverySiteId": "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]"
+              }
+            },
+            {
+              "type": "microsoft.offazure/mastersites/webappsites/discoverysitedatasources",
+              "apiVersion": "2020-11-11-preview",
+              "name": "[concat(parameters('projectName'), 'mastersite/', parameters('projectName'), 'webappsite/vmwarediscoverysource')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]",
+                "[resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'webappsite'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "properties": {
+                "discoverySiteId": "[resourceId('Microsoft.OffAzure/VMwareSites', concat(parameters('projectName'), 'vmwaresite'))]"
+              }
+            },
+            {
+              "type": "microsoft.migrate/assessmentprojects/sqlcollectors",
+              "apiVersion": "2023-03-15",
+              "name": "[concat(parameters('projectName'), 'asmproject/', parameters('projectName'), 'sqlcollector')]",
+              "dependsOn": [
+                "[resourceId('microsoft.offazure/mastersites/sqlsites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'sqlsites'))]",
+                "[resourceId('Microsoft.Migrate/assessmentprojects', concat(parameters('projectName'), 'asmproject'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "agentProperties": {
+                  "id": "[reference(resourceId('microsoft.offazure/mastersites/sqlsites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'sqlsites')), '2023-06-06').siteAppliancePropertiesCollection[0].agentDetails.id]",
+                  "spnDetails": {
+                    "authority": "authority",
+                    "applicationId": "appId",
+                    "audience": "audience",
+                    "objectId": "objectid",
+                    "tenantId": "tenantid"
+                  }
+                },
+                "discoverySiteId": "[resourceId('microsoft.offazure/mastersites/sqlsites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'sqlsites'))]"
+              }
+            },
+            {
+              "type": "Microsoft.Migrate/assessmentprojects/webappcollectors",
+              "apiVersion": "2020-05-01-preview",
+              "name": "[concat(parameters('projectName'), 'asmproject/', parameters('projectName'), 'asmprojectwebappcollector')]",
+              "location": "[parameters('location')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Migrate/assessmentprojects', concat(parameters('projectName'), 'asmproject'))]",
+                "[resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'webappsite'))]"
+              ],
+              "tags": {
+                "Migrate Project": "[parameters('projectName')]"
+              },
+              "kind": "Migrate",
+              "properties": {
+                "agentProperties": {
+                  "agentId": "[reference(resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'webappsite')), '2023-06-06').siteAppliancePropertiesCollection[0].agentDetails.id]",
+                  "spnDetails": {
+                    "authority": "authority",
+                    "applicationId": "appId",
+                    "audience": "audience",
+                    "objectId": "objectid",
+                    "tenantId": "tenantid"
+                  }
+                },
+                "discoverySiteId": "[resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(parameters('projectName'), 'mastersite'), concat(parameters('projectName'), 'webappsite'))]"
+              }
             }
           ],
           "outputs": {
             "migrateProjectName": {
               "type": "string",
-              "value": "[parameters('name')]"
+              "value": "[parameters('migrateProjectName')]"
             },
             "migrateProjectId": {
               "type": "string",
-              "value": "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('name'))]"
+              "value": "[resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName'))]"
+            },
+            "projectName": {
+              "type": "string",
+              "value": "[parameters('projectName')]"
             },
             "location": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Migrate/MigrateProjects', parameters('name')), '2020-06-01-preview', 'full').location]"
+              "value": "[reference(resourceId('Microsoft.Migrate/MigrateProjects', parameters('migrateProjectName')), '2020-06-01-preview', 'full').location]"
             }
           }
         }
-      }
-    },
-    {
-      "type": "Microsoft.OffAzure/VMwareSites",
-      "apiVersion": "2020-07-10",
-      "name": "[concat(variables('projectName'), 'vmwaresite')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "applianceName": "[variables('applianceName')]",
-        "servicePrincipalIdentityDetails": {
-          "tenantId": "tenantId",
-          "applicationId": "applicationId",
-          "objectId": "objectId",
-          "audience": "audience",
-          "aadAuthority": "aadAuthority"
-        },
-        "discoverySolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', variables('projectName'), 'Servers-Discovery-ServerDiscovery')]"
-      }
-    },
-    {
-      "type": "Microsoft.Migrate/assessmentprojects",
-      "apiVersion": "2020-05-01-preview",
-      "name": "[concat(variables('projectName'), 'asmproject')]",
-      "location": "[parameters('location')]",
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "projectStatus": "Active",
-        "assessmentSolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', variables('projectName'), 'Servers-Assessment-ServerAssessment')]"
-      }
-    },
-    {
-      "type": "Microsoft.Migrate/assessmentprojects/vmwarecollectors",
-      "apiVersion": "2025-09-09-preview",
-      "name": "[concat(variables('projectName'), 'asmproject', '/', variables('projectName'), 'asmprojectvmwarecollector')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Migrate/assessmentprojects', concat(variables('projectName'), 'asmproject'))]",
-        "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "agentProperties": {
-          "id": "[reference(resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite')), '2020-07-10').agentDetails.id]",
-          "spnDetails": {
-            "authority": "authority",
-            "applicationId": "appId",
-            "audience": "audience",
-            "objectId": "objectid",
-            "tenantId": "tenantid"
-          }
-        },
-        "discoverySiteId": "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]"
-      }
-    },
-    {
-      "type": "Microsoft.OffAzure/MasterSites",
-      "apiVersion": "2020-07-07",
-      "name": "[concat(variables('projectName'), 'mastersite')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]",
-        "[resourceId('microsoft.applicationmigration/pgsqlsites', concat(variables('projectName'), 'pgsql'))]",
-        "[resourceId('microsoft.mysqldiscovery/mysqlsites', concat(variables('projectName'), 'mysql'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "allowMultipleSites": true,
-        "sites": [
-          "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]",
-          "[resourceId('microsoft.applicationmigration/pgsqlsites', concat(variables('projectName'), 'pgsql'))]",
-          "[resourceId('microsoft.mysqldiscovery/mysqlsites', concat(variables('projectName'), 'mysql'))]"
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.OffAzure/MasterSites/WebAppSites",
-      "apiVersion": "2020-11-11-preview",
-      "name": "[concat(variables('projectName'), 'mastersite/', variables('projectName'), 'webappsite')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OffAzure/MasterSites', concat(variables('projectName'), 'mastersite'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "discoverySolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', variables('projectName'), 'Servers-Discovery-ServerDiscovery')]",
-        "siteAppliancePropertiesCollection": [
-          {
-            "servicePrincipalIdentityDetails": {
-              "tenantId": "tenantId",
-              "applicationId": "applicationId",
-              "objectId": "objectId",
-              "audience": "audience",
-              "aadAuthority": "aadAuthority"
-            },
-            "applianceName": "[variables('applianceName')]"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Migrate/assessmentprojects/webappcollectors",
-      "apiVersion": "2020-05-01-preview",
-      "name": "[concat(variables('projectName'), 'asmproject', '/', variables('projectName'), 'asmprojectwebappcollector')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Migrate/assessmentprojects', concat(variables('projectName'), 'asmproject'))]",
-        "[resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'webappsite'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "agentProperties": {
-          "agentId": "[reference(resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'webappsite')), '2023-06-06').siteAppliancePropertiesCollection[0].agentDetails.id]",
-          "spnDetails": {
-            "authority": "authority",
-            "applicationId": "appId",
-            "audience": "audience",
-            "objectId": "objectid",
-            "tenantId": "tenantid"
-          }
-        },
-        "discoverySiteId": "[resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'webappsite'))]"
-      }
-    },
-    {
-      "type": "microsoft.offazure/mastersites/sqlsites",
-      "apiVersion": "2022-10-27",
-      "name": "[concat(variables('projectName'), 'mastersite/', variables('projectName'), 'sqlsites')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OffAzure/MasterSites', concat(variables('projectName'), 'mastersite'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "discoverySolutionId": "[resourceId('Microsoft.Migrate/MigrateProjects/Solutions', variables('projectName'), 'Servers-Discovery-ServerDiscovery')]",
-        "siteAppliancePropertiesCollection": [
-          {
-            "servicePrincipalIdentityDetails": {
-              "tenantId": "tenantId",
-              "applicationId": "applicationId",
-              "objectId": "objectId",
-              "audience": "audience",
-              "aadAuthority": "aadAuthority"
-            },
-            "applianceName": "[variables('applianceName')]"
-          }
-        ]
-      }
-    },
-    {
-      "type": "microsoft.offazure/mastersites/sqlsites/discoverysitedatasources",
-      "apiVersion": "2020-11-11-preview",
-      "name": "[concat(variables('projectName'), 'mastersite/', variables('projectName'), 'sqlsites/vmwarediscoverysource')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]",
-        "[resourceId('microsoft.offazure/mastersites/sqlsites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'sqlsites'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "properties": {
-        "discoverySiteId": "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]"
-      }
-    },
-    {
-      "type": "microsoft.migrate/assessmentprojects/sqlcollectors",
-      "apiVersion": "2023-03-15",
-      "name": "[concat(variables('projectName'), 'asmproject/', variables('projectName'), 'sqlcollector')]",
-      "dependsOn": [
-        "[resourceId('microsoft.offazure/mastersites/sqlsites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'sqlsites'))]",
-        "[resourceId('Microsoft.Migrate/assessmentprojects', concat(variables('projectName'), 'asmproject'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "kind": "Migrate",
-      "properties": {
-        "agentProperties": {
-          "id": "[reference(resourceId('microsoft.offazure/mastersites/sqlsites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'sqlsites')), '2023-06-06').siteAppliancePropertiesCollection[0].agentDetails.id]",
-          "spnDetails": {
-            "authority": "authority",
-            "applicationId": "appId",
-            "audience": "audience",
-            "objectId": "objectid",
-            "tenantId": "tenantid"
-          }
-        },
-        "discoverySiteId": "[resourceId('microsoft.offazure/mastersites/sqlsites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'sqlsites'))]"
-      }
-    },
-    {
-      "type": "microsoft.offazure/mastersites/webappsites/discoverysitedatasources",
-      "apiVersion": "2020-11-11-preview",
-      "name": "[concat(variables('projectName'), 'mastersite/', variables('projectName'), 'webappsite/vmwarediscoverysource')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]",
-        "[resourceId('Microsoft.OffAzure/MasterSites/WebAppSites', concat(variables('projectName'), 'mastersite'), concat(variables('projectName'), 'webappsite'))]"
-      ],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "properties": {
-        "discoverySiteId": "[resourceId('Microsoft.OffAzure/VMwareSites', concat(variables('projectName'), 'vmwaresite'))]"
-      }
-    },
-    {
-      "type": "microsoft.applicationmigration/pgsqlsites",
-      "apiVersion": "2025-02-01-preview",
-      "name": "[concat(variables('projectName'), 'pgsql')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "properties": {
-        "masterSiteId": "[resourceId('Microsoft.OffAzure/MasterSites', concat(variables('projectName'), 'mastersite'))]",
-        "migrateProjectId": "[resourceId('Microsoft.Migrate/MigrateProjects', format('{0}-azm', parameters('prefix')))]"
-      }
-    },
-    {
-      "type": "microsoft.mysqldiscovery/mysqlsites",
-      "apiVersion": "2024-12-30-preview",
-      "name": "[concat(variables('projectName'), 'mysql')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [],
-      "tags": {
-        "Migrate Project": "[variables('projectName')]"
-      },
-      "properties": {
-        "masterSiteId": "[resourceId('Microsoft.OffAzure/MasterSites', concat(variables('projectName'), 'mastersite'))]",
-        "migrateProjectId": "[resourceId('Microsoft.Migrate/MigrateProjects', format('{0}-azm', parameters('prefix')))]"
       }
     }
   ],
