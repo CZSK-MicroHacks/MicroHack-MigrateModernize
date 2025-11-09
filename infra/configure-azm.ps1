@@ -1,35 +1,11 @@
+Set-StrictMode -Version 3.0
+
 ######################################################
 ##############   CONFIGURATIONS   ###################
 ######################################################
 
 $SkillableEnvironment = $false
-$environmentName = "crgmig21" # Set your environment name here for non-Skillable environments
-
-# Environment name and prefix for all azure resources
-if ($SkillableEnvironment) {
-    $environmentName = "lab@lab.LabInstance.ID"
-    $resourceGroup = "on-prem"
-}
-else {
-    # Configuration
-$SkillableEnvironment = $true
-$environmentName = "teamXY"
-
-# Storage account configuration for logging in Skillable environments
-$STORAGE_ACCOUNT_NAME = "sttestuploads"
-$CONTAINER_NAME = "script-logs"  
-$LOG_BLOB_NAME = "${environmentName}-configure-azm-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
-$STORAGE_SAS_TOKEN = "?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2024-12-31T22:39:06Z&st=2024-04-10T14:39:06Z&spr=https,http&sig=MwUc4sXO5sJJFAy7GF8LBp49Nqb4CtJ6zHq%2BD2Lg5P0%3D"
-}
-
-# Blob used to send log messages
-$STORAGE_SAS_TOKEN = "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-01-30T22:09:19Z&st=2025-11-05T13:54:19Z&spr=https&sig=mBoL3bVHPGSniTeFzXZ5QdItTxaFYOrhXIOzzM2jvF0%3D"
-$STORAGE_ACCOUNT_NAME = "azmdeploymentlogs"
-$CONTAINER_NAME = "logs"
-$LOG_BLOB_NAME = "$environmentName.log"
-
-# API version constant
-$apiVersionOffAzure = "2024-12-01-preview"
+$environmentName = "crgmig23" # Set your environment name here for non-Skillable environments
 
 ######################################################
 ##############   INFRASTRUCTURE FUNCTIONS   #########
@@ -44,7 +20,6 @@ function Import-AzureModules {
     
     Write-LogToBlob "Azure PowerShell modules imported successfully"
 }
-
 function Get-AuthenticationHeaders {
     Write-LogToBlob "Getting access token for REST API calls"
     
@@ -270,7 +245,7 @@ function Start-ArtifactImport {
         $subscriptionId = (Get-AzContext).Subscription.Id
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
         $masterSiteName = "${EnvironmentName}mastersite"
-        $apiVersionOffAzure = "2020-01-01"
+        $apiVersionOffAzure = "2024-12-01-preview"
         
         # Upload the ZIP file to OffAzure and start import
         $importUriUrl = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/masterSites/$masterSiteName/Import?api-version=$apiVersionOffAzure"
@@ -278,7 +253,7 @@ function Start-ArtifactImport {
         
         $importResponse = Invoke-RestMethod -Uri $importUriUrl -Method POST -Headers $Headers
         $blobUri = $importResponse.uri
-        $jobArmId = $importResponse.jobArmId
+        $jobArmId = $importResponse.jobArmId.Trim()
 
         Write-LogToBlob "Blob URI: $blobUri"
         Write-LogToBlob "Job ARM ID: $jobArmId"
@@ -308,9 +283,11 @@ function Wait-ImportJobCompletion {
     
     Write-LogToBlob "Waiting for import job completion"
     
+    $JobArmId = $JobArmId.Trim()
+
     try {
-        $apiVersionOffAzure = "2020-01-01"
-        $jobUrl = "https://management.azure.com$JobArmId?api-version=$apiVersionOffAzure"
+        $apiVersionOffAzure = "2024-12-01-preview"
+        $jobUrl = "https://management.azure.com$($JobArmId)?api-version=$apiVersionOffAzure"
         $waitTimeSeconds = 20
         $maxAttempts = 50 * (60 / $waitTimeSeconds)  # 50 minutes timeout
         $attempt = 0
@@ -349,8 +326,98 @@ function Wait-ImportJobCompletion {
 }
 
 ######################################################
-##############   VMWARE COLLECTOR FUNCTIONS   #######
+##############   SITE AND COLLECTOR FUNCTIONS   #####
 ######################################################
+
+function Get-WebAppSiteDetails {
+    param(
+        [string]$EnvironmentName,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Getting WebApp Site details"
+    
+    try {
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $masterSiteName = "${EnvironmentName}mastersite"
+ $apiVersionOffAzure = "2024-12-01-preview"
+        
+        $webAppSiteUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/WebAppSites/${EnvironmentName}webappsite?api-version=$apiVersionOffAzure"
+        Write-LogToBlob "WebApp Site URI: $webAppSiteUri"
+
+        $webAppSiteResponse = Invoke-RestMethod -Uri $webAppSiteUri -Method GET -Headers $Headers
+        $webAppSiteId = $webAppSiteResponse.id
+        
+        # Extract agent ID from siteAppliancePropertiesCollection
+        $webAppAgentId = $null
+        if ($webAppSiteResponse.properties.siteAppliancePropertiesCollection -and $webAppSiteResponse.properties.siteAppliancePropertiesCollection.Count -gt 0) {
+            $webAppAgentId = $webAppSiteResponse.properties.siteAppliancePropertiesCollection[0].agentDetails.id
+            Write-LogToBlob "WebApp Agent ID: $webAppAgentId"
+        } else {
+            Write-LogToBlob "No appliance properties found in WebApp site" "WARN"
+        }
+        
+        Write-LogToBlob "WebApp Site retrieved successfully"
+        
+        return @{
+            SiteId = $webAppSiteId
+            AgentId = $webAppAgentId
+        }
+    }
+    catch {
+        Write-LogToBlob "Failed to get WebApp Site details: $($_.Exception.Message)" "WARN"
+        return @{
+            SiteId = $null
+            AgentId = $null
+        }
+    }
+}
+
+function Get-SqlSiteDetails {
+    param(
+        [string]$EnvironmentName,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Getting SQL Site details"
+    
+    try {
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $masterSiteName = "${EnvironmentName}mastersite"
+        $apiVersionOffAzure = "2024-12-01-preview"
+        
+        $sqlSiteUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/SqlSites/${EnvironmentName}sqlsites?api-version=$apiVersionOffAzure"
+        Write-LogToBlob "SQL Site URI: $sqlSiteUri"
+
+        $sqlSiteResponse = Invoke-RestMethod -Uri $sqlSiteUri -Method GET -Headers $Headers
+        $sqlSiteId = $sqlSiteResponse.id
+        
+        # Extract agent ID from siteAppliancePropertiesCollection
+        $sqlAgentId = $null
+        if ($sqlSiteResponse.properties.siteAppliancePropertiesCollection -and $sqlSiteResponse.properties.siteAppliancePropertiesCollection.Count -gt 0) {
+            $sqlAgentId = $sqlSiteResponse.properties.siteAppliancePropertiesCollection[0].agentDetails.id
+            Write-LogToBlob "SQL Agent ID: $sqlAgentId"
+        } else {
+            Write-LogToBlob "No appliance properties found in SQL site" "WARN"
+        }
+        
+        Write-LogToBlob "SQL Site retrieved successfully"
+        
+        return @{
+            SiteId = $sqlSiteId
+            AgentId = $sqlAgentId
+        }
+    }
+    catch {
+        Write-LogToBlob "Failed to get SQL Site details: $($_.Exception.Message)" "WARN"
+        return @{
+            SiteId = $null
+            AgentId = $null
+        }
+    }
+}
 
 function Get-VMwareCollectorAgentId {
     param(
@@ -363,7 +430,7 @@ function Get-VMwareCollectorAgentId {
     try {
         $subscriptionId = (Get-AzContext).Subscription.Id
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
-        $apiVersionOffAzure = "2020-01-01"
+ $apiVersionOffAzure = "2024-12-01-preview"
         
         $vmwareSiteUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/VMwareSites/${EnvironmentName}vmwaresite?api-version=$apiVersionOffAzure"
         $vmwareSiteResponse = Invoke-RestMethod -Uri $vmwareSiteUri -Method GET -Headers $Headers
@@ -397,7 +464,7 @@ function Invoke-VMwareCollectorSync {
         $assessmentProjectName = "${EnvironmentName}asmproject"
         $vmwareCollectorName = "${EnvironmentName}vmwaresitevmwarecollector"
         
-        $vmwareCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/vmwarecollectors/$vmwareCollectorName?api-version=2018-06-30-preview"
+        $vmwareCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/vmwarecollectors/$($vmwareCollectorName)?api-version=2018-06-30-preview"
         Write-LogToBlob "VMware Collector URI: $vmwareCollectorUri"
         
         $vmwareCollectorBody = @{
@@ -437,6 +504,128 @@ function Invoke-VMwareCollectorSync {
     catch {
         Write-LogToBlob "Failed to synchronize VMware Collector: $($_.Exception.Message)" "ERROR"
         throw
+    }
+}
+
+function New-WebAppCollector {
+    param(
+        [string]$EnvironmentName,
+        [string]$WebAppSiteId,
+        [string]$WebAppAgentId,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Creating WebApp Collector"
+    
+    try {
+        if (-not $WebAppAgentId -or -not $WebAppSiteId) {
+            Write-LogToBlob "Skipping WebApp Collector creation - missing WebApp agent ID or site ID" "WARN"
+            return $false
+        }
+
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $assessmentProjectName = "${EnvironmentName}asmproject"
+        $webAppCollectorName = "${EnvironmentName}webappsitecollector"
+        $webAppApiVersion = "2025-09-09-preview"
+        
+        $webAppCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/webappcollectors/$webAppCollectorName?api-version=$webAppApiVersion"
+        Write-LogToBlob "WebApp Collector URI: $webAppCollectorUri"
+        
+        $webAppCollectorBody = @{
+            "id" = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/webappcollectors/$webAppCollectorName"
+            "name" = "$webAppCollectorName"
+            "type" = "Microsoft.Migrate/assessmentprojects/webappcollectors"
+            "properties" = @{
+                "agentProperties" = @{
+                    "id" = $WebAppAgentId
+                    "version" = $null
+                    "lastHeartbeatUtc" = $null
+                    "spnDetails" = @{
+                        "authority" = "authority"
+                        "applicationId" = "appId"
+                        "audience" = "audience"
+                        "objectId" = "objectid"
+                        "tenantId" = "tenantid"
+                    }
+                }
+                "discoverySiteId" = $WebAppSiteId
+            }
+        } | ConvertTo-Json -Depth 10
+        
+        Invoke-RestMethod -Uri $webAppCollectorUri `
+            -Method PUT `
+            -Headers $Headers `
+            -ContentType 'application/json' `
+            -Body $webAppCollectorBody | Out-Null
+            
+        Write-LogToBlob "WebApp Collector created successfully"
+        return $true
+    }
+    catch {
+        Write-LogToBlob "Failed to create WebApp Collector: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function New-SqlCollector {
+    param(
+        [string]$EnvironmentName,
+        [string]$SqlSiteId,
+        [string]$SqlAgentId,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Creating SQL Collector"
+    
+    try {
+        if (-not $SqlAgentId -or -not $SqlSiteId) {
+            Write-LogToBlob "Skipping SQL Collector creation - missing SQL agent ID or site ID" "WARN"
+            return $false
+        }
+
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $assessmentProjectName = "${EnvironmentName}asmproject"
+        $sqlCollectorName = "${EnvironmentName}sqlsitescollector"
+        $sqlApiVersion = "2025-09-09-preview"
+        
+        $sqlCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlcollectors/$sqlCollectorName?api-version=$sqlApiVersion"
+        Write-LogToBlob "SQL Collector URI: $sqlCollectorUri"
+        
+        $sqlCollectorBody = @{
+            "id" = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlcollectors/$sqlCollectorName"
+            "name" = "$sqlCollectorName"
+            "type" = "Microsoft.Migrate/assessmentprojects/sqlcollectors"
+            "properties" = @{
+                "agentProperties" = @{
+                    "id" = $SqlAgentId
+                    "version" = $null
+                    "lastHeartbeatUtc" = $null
+                    "spnDetails" = @{
+                        "authority" = "authority"
+                        "applicationId" = "appId"
+                        "audience" = "audience"
+                        "objectId" = "objectid"
+                        "tenantId" = "tenantid"
+                    }
+                }
+                "discoverySiteId" = $SqlSiteId
+            }
+        } | ConvertTo-Json -Depth 10
+        
+        Invoke-RestMethod -Uri $sqlCollectorUri `
+            -Method PUT `
+            -Headers $Headers `
+            -ContentType 'application/json' `
+            -Body $sqlCollectorBody | Out-Null
+            
+        Write-LogToBlob "SQL Collector created successfully"
+        return $true
+    }
+    catch {
+        Write-LogToBlob "Failed to create SQL Collector: $($_.Exception.Message)" "ERROR"
+        return $false
     }
 }
 
@@ -527,15 +716,353 @@ migrateresources
     }
 }
 
+function New-SqlAssessment {
+    param(
+        [string]$EnvironmentName,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Creating SQL Assessment"
+    
+    try {
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $assessmentProjectName = "${EnvironmentName}asmproject"
+        $masterSiteName = "${EnvironmentName}mastersite"
+        
+        # Generate random suffix for assessment name
+        $assessmentRandomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
+        $assessmentName = "assessment$assessmentRandomSuffix"
+        $apiVersion = "2024-03-03-preview"
+        
+        $assessmentBody = @{
+            "type" = "Microsoft.Migrate/assessmentprojects/assessments"
+            "apiVersion" = "$apiVersion"
+            "name" = "$assessmentProjectName/$assessmentName"
+            "location" = "swedencentral"
+            "tags" = @{}
+            "kind" = "Migrate"
+            "properties" = @{
+                "settings" = @{
+                    "performanceData" = @{
+                        "timeRange" = "Day"
+                        "percentile" = "Percentile95"
+                    }
+                    "scalingFactor" = 1
+                    "azureSecurityOfferingType" = "MDC"
+                    "osLicense" = "Yes"
+                    "azureLocation" = "swedencentral"
+                    "preferredTargets" = @("SqlMI")
+                    "discountPercentage" = 0
+                    "currency" = "USD"
+                    "sizingCriterion" = "PerformanceBased"
+                    "savingsSettings" = @{
+                        "savingsOptions" = "SavingsPlan1Year"
+                    }
+                    "billingSettings" = @{
+                        "licensingProgram" = "Retail"
+                        "subscriptionId" = "$subscriptionId"
+                    }
+                    "sqlServerLicense" = "Yes"
+                    "azureSqlVmSettings" = @{
+                        "azureSqlServiceTier" = "GeneralPurpose"
+                        "azureSqlComputeTier" = "Provisioned"
+                        "azureSqlPurchasingModel" = "VCore"
+                        "azureSqlDataDiskType" = "StandardSSD"
+                        "azureSqlLogDiskType" = "StandardSSD"
+                    }
+                    "entityUptime" = @{
+                        "daysPerMonth" = "31"
+                        "hoursPerDay" = "24"
+                    }
+                    "azureSqlManagedInstanceSettings" = @{
+                        "azureSqlServiceTier" = "GeneralPurpose"
+                        "azureSqlComputeTier" = "Provisioned"
+                    }
+                    "azureSqlDatabaseSettings" = @{
+                        "azureSqlServiceTier" = "GeneralPurpose"
+                        "azureSqlComputeTier" = "Provisioned"
+                        "azureSqlPurchasingModel" = "VCore"
+                        "azureSqlDataBaseType" = "SingleDatabase"
+                    }
+                    "environmentType" = "Production"
+                    "enableHadrAssessment" = $true
+                    "disasterRecoveryLocation" = "swedencentral"
+                    "multiSubnetIntent" = "DisasterRecovery"
+                    "isInternetAccessAvailable" = $true
+                    "asyncCommitModeIntent" = "DisasterRecovery"
+                }
+                "details" = @{}
+                "scope" = @{
+                    "azureResourceGraphQuery" = @"
+migrateresources
+| where id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/vmwareSites/${EnvironmentName}vmwaresite" or
+    id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/WebAppSites/${EnvironmentName}webappsite" or
+    id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/SqlSites/${EnvironmentName}sqlsites"
+"@
+                    "scopeType" = "AzureResourceGraphQuery"
+                }
+            }
+        } | ConvertTo-Json -Depth 10
+
+        $assessmentUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlassessments/$assessmentName?api-version=$apiVersion"
+        
+        Write-LogToBlob "SQL Assessment URI: $assessmentUri"
+        Write-LogToBlob "SQL Assessment Body: $assessmentBody"
+        
+        $response = Invoke-RestMethod `
+            -Uri $assessmentUri `
+            -Method PUT `
+            -Headers $Headers `
+            -ContentType 'application/json' `
+            -Body $assessmentBody
+
+        Write-LogToBlob "SQL Assessment created successfully"
+        Write-LogToBlob "SQL Assessment response: $($response | ConvertTo-Json -Depth 10)"
+        
+        return $assessmentName
+    }
+    catch {
+        Write-LogToBlob "Failed to create SQL assessment: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
+######################################################
+##############   BUSINESS CASE FUNCTIONS   ##########
+######################################################
+
+function New-BusinessCaseOptimizeForPaas {
+    param(
+        [string]$EnvironmentName,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Creating OptimizeForPaas Business Case"
+    
+    try {
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $assessmentProjectName = "${EnvironmentName}asmproject"
+        $masterSiteName = "${EnvironmentName}mastersite"
+        
+        # Generate random suffix for business case name
+        $randomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
+        $businessCaseName = "buizzcase$randomSuffix"
+        $businessCaseApiVersion = "2025-09-09-preview"
+        
+        $businessCaseBody = @{
+            "type" = "Microsoft.Migrate/assessmentprojects/businesscases"
+            "apiVersion" = "$businessCaseApiVersion"
+            "name" = "$assessmentProjectName/$businessCaseName"
+            "location" = "swedencentral"
+            "kind" = "Migrate"
+            "properties" = @{
+                "businessCaseScope" = @{
+                    "scopeType" = "Datacenter"
+                    "azureResourceGraphQuery" = @"
+migrateresources
+| where id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/vmwareSites/${EnvironmentName}vmwaresite" or
+    id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/WebAppSites/${EnvironmentName}webappsite" or
+    id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/SqlSites/${EnvironmentName}sqlsites"
+"@
+                }
+                "settings" = @{
+                    "commonSettings" = @{
+                        "discountPercentage" = 0
+                        "currency" = "USD"
+                        "azureLocation" = "swedencentral"
+                        "enablePreviewFeatures" = $false
+                        "yOYGrowth" = 5
+                    }
+                    "azureSettings" = @{
+                        "complyWithCaf" = "OptimizeForPaas"
+                        "optimizationLogic" = "ModernizeToPaas"
+                    }
+                }
+                "details" = @{}
+            }
+        } | ConvertTo-Json -Depth 10
+
+        $businessCaseUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/businesscases/$businessCaseName?api-version=$businessCaseApiVersion"
+        
+        Write-LogToBlob "OptimizeForPaas Business Case URI: $businessCaseUri"
+        Write-LogToBlob "OptimizeForPaas Business Case Body: $businessCaseBody"
+        
+        $response = Invoke-RestMethod -Uri $businessCaseUri `
+            -Method PUT `
+            -Headers $Headers `
+            -ContentType 'application/json' `
+            -Body $businessCaseBody
+
+        Write-LogToBlob "OptimizeForPaas Business Case created successfully"
+        Write-LogToBlob "OptimizeForPaas Business Case response: $($response | ConvertTo-Json -Depth 10)"
+        
+        return $businessCaseName
+    }
+    catch {
+        Write-LogToBlob "Failed to create OptimizeForPaas Business Case: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
+function New-BusinessCaseIaasOnly {
+    param(
+        [string]$EnvironmentName,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Creating IaaSOnly Business Case"
+    
+    try {
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $assessmentProjectName = "${EnvironmentName}asmproject"
+        $masterSiteName = "${EnvironmentName}mastersite"
+        
+        # Generate random suffix for business case name
+        $randomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
+        $businessCaseName = "buizzcase$randomSuffix"
+        $businessCaseApiVersion = "2025-09-09-preview"
+        
+        $businessCaseBody = @{
+            "type" = "Microsoft.Migrate/assessmentprojects/businesscases"
+            "apiVersion" = "$businessCaseApiVersion"
+            "name" = "$assessmentProjectName/$businessCaseName"
+            "location" = "swedencentral"
+            "kind" = "Migrate"
+            "properties" = @{
+                "businessCaseScope" = @{
+                    "scopeType" = "Datacenter"
+                    "azureResourceGraphQuery" = @"
+migrateresources
+| where id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/vmwareSites/${EnvironmentName}vmwaresite" or
+    id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/WebAppSites/${EnvironmentName}webappsite" or
+    id contains "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.OffAzure/MasterSites/$masterSiteName/SqlSites/${EnvironmentName}sqlsites"
+"@
+                }
+                "settings" = @{
+                    "commonSettings" = @{
+                        "discountPercentage" = 0
+                        "currency" = "USD"
+                        "azureLocation" = "swedencentral"
+                        "enablePreviewFeatures" = $false
+                        "yOYGrowth" = 5
+                    }
+                    "azureSettings" = @{
+                        "complyWithCaf" = "IaaSOnly"
+                        "optimizationLogic" = "MinimizeCost"
+                    }
+                }
+                "details" = @{}
+            }
+        } | ConvertTo-Json -Depth 10
+
+        $businessCaseUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/businesscases/$businessCaseName?api-version=$businessCaseApiVersion"
+        
+        Write-LogToBlob "IaaSOnly Business Case URI: $businessCaseUri"
+        Write-LogToBlob "IaaSOnly Business Case Body: $businessCaseBody"
+        
+        $response = Invoke-RestMethod -Uri $businessCaseUri `
+            -Method PUT `
+            -Headers $Headers `
+            -ContentType 'application/json' `
+            -Body $businessCaseBody
+
+        Write-LogToBlob "IaaSOnly Business Case created successfully"
+        Write-LogToBlob "IaaSOnly Business Case response: $($response | ConvertTo-Json -Depth 10)"
+        
+        return $businessCaseName
+    }
+    catch {
+        Write-LogToBlob "Failed to create IaaSOnly Business Case: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
+function New-HeterogeneousAssessment {
+    param(
+        [string]$EnvironmentName,
+        [hashtable]$Headers
+    )
+    
+    Write-LogToBlob "Creating Heterogeneous Assessment"
+    
+    try {
+        $subscriptionId = (Get-AzContext).Subscription.Id
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $assessmentProjectName = "${EnvironmentName}asmproject"
+        
+        # Generate random suffix for heterogeneous assessment name
+        $heteroAssessmentRandomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
+        $heteroAssessmentName = "default-all-workloads$heteroAssessmentRandomSuffix"
+        $heteroApiVersion = "2024-03-03-preview"
+        
+        $heteroAssessmentBody = @{
+            "type" = "Microsoft.Migrate/assessmentProjects/heterogeneousAssessments"
+            "apiVersion" = "$heteroApiVersion"
+            "name" = "$assessmentProjectName/$heteroAssessmentName"
+            "location" = "swedencentral"
+            "tags" = @{}
+            "kind" = "Migrate"
+            "properties" = @{
+                "assessmentArmIds" = @(
+                    "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/AssessmentProjects/$assessmentProjectName/assessments/assessment*",
+                    "/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlassessments/assessment*"
+                )
+            }
+        } | ConvertTo-Json -Depth 10
+
+        $heteroAssessmentUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/heterogeneousAssessments/$heteroAssessmentName?api-version=$heteroApiVersion"
+        
+        Write-LogToBlob "Heterogeneous Assessment URI: $heteroAssessmentUri"
+        Write-LogToBlob "Heterogeneous Assessment Body: $heteroAssessmentBody"
+        
+        $response = Invoke-RestMethod -Uri $heteroAssessmentUri `
+            -Method PUT `
+            -Headers $Headers `
+            -ContentType 'application/json' `
+            -Body $heteroAssessmentBody
+
+        Write-LogToBlob "Heterogeneous Assessment created successfully"
+        Write-LogToBlob "Heterogeneous Assessment response: $($response | ConvertTo-Json -Depth 10)"
+        
+        return $heteroAssessmentName
+    }
+    catch {
+        Write-LogToBlob "Failed to create Heterogeneous Assessment: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
 ######################################################
 ##############   MAIN EXECUTION FUNCTION   ##########
 ######################################################
 
 function Invoke-AzureMigrateConfiguration {
     param(
-        [string]$EnvironmentName
+        [bool] $SkillableEnvironment,
+        [string] $EnvironmentName
     )
     
+    # Environment name and prefix for all azure resources
+    if ($SkillableEnvironment) {
+        $environmentName = "lab@lab.LabInstance.ID"
+        $resourceGroup = "on-prem"
+    }
+    else {
+        $resourceGroup = "${environmentName}-rg"
+    }
+
+    # Blob used to send log messages
+    $STORAGE_SAS_TOKEN = "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-01-30T22:09:19Z&st=2025-11-05T13:54:19Z&spr=https&sig=mBoL3bVHPGSniTeFzXZ5QdItTxaFYOrhXIOzzM2jvF0%3D"
+    $STORAGE_ACCOUNT_NAME = "azmdeploymentlogs"
+    $CONTAINER_NAME = "logs"
+    $LOG_BLOB_NAME = "$environmentName.log.txt"
+
+    # API version constant
+    $apiVersionOffAzure = "2024-12-01-preview"
+   
     Write-LogToBlob "=== Starting Azure Migrate Configuration ==="
     Write-LogToBlob "Environment: $EnvironmentName"
     Write-LogToBlob "Skillable Mode: $SkillableEnvironment"
@@ -561,14 +1088,39 @@ function Invoke-AzureMigrateConfiguration {
         $jobArmId = Start-ArtifactImport -LocalZipFilePath $localZipPath -EnvironmentName $EnvironmentName -Headers $headers
         Wait-ImportJobCompletion -JobArmId $jobArmId -Headers $headers
         
-        # Step 6: Configure VMware Collector
+        # Step 6: Get site details for WebApp and SQL
+        $webAppSiteDetails = Get-WebAppSiteDetails -EnvironmentName $EnvironmentName -Headers $headers
+        $sqlSiteDetails = Get-SqlSiteDetails -EnvironmentName $EnvironmentName -Headers $headers
+        
+        # Step 7: Configure VMware Collector
         $agentId = Get-VMwareCollectorAgentId -EnvironmentName $EnvironmentName -Headers $headers
         Invoke-VMwareCollectorSync -AgentId $agentId -EnvironmentName $EnvironmentName -Headers $headers
         
-        # Step 7: Create migration assessment
+        # Step 8: Create WebApp and SQL Collectors (if available)
+        $webAppCollectorCreated = New-WebAppCollector -EnvironmentName $EnvironmentName -WebAppSiteId $webAppSiteDetails.SiteId -WebAppAgentId $webAppSiteDetails.AgentId -Headers $headers
+        $sqlCollectorCreated = New-SqlCollector -EnvironmentName $EnvironmentName -SqlSiteId $sqlSiteDetails.SiteId -SqlAgentId $sqlSiteDetails.AgentId -Headers $headers
+        
+        # Step 9: Create assessments
         New-MigrationAssessment -EnvironmentName $EnvironmentName -Headers $headers
+        $sqlAssessmentName = New-SqlAssessment -EnvironmentName $EnvironmentName -Headers $headers
+        
+        # Step 10: Create business cases
+        $paasBusinessCaseName = New-BusinessCaseOptimizeForPaas -EnvironmentName $EnvironmentName -Headers $headers
+        $iaasBusinessCaseName = New-BusinessCaseIaasOnly -EnvironmentName $EnvironmentName -Headers $headers
+        
+        # Step 11: Create heterogeneous assessment
+        $heteroAssessmentName = New-HeterogeneousAssessment -EnvironmentName $EnvironmentName -Headers $headers
         
         Write-LogToBlob "=== Azure Migrate Configuration Completed Successfully ==="
+        Write-LogToBlob "Summary of created resources:"
+        Write-LogToBlob "- VMware Collector: Synchronized"
+        Write-LogToBlob "- WebApp Collector: $(if ($webAppCollectorCreated) { 'Created' } else { 'Skipped' })"
+        Write-LogToBlob "- SQL Collector: $(if ($sqlCollectorCreated) { 'Created' } else { 'Skipped' })"
+        Write-LogToBlob "- VM Assessment: Created"
+        Write-LogToBlob "- SQL Assessment: $sqlAssessmentName"
+        Write-LogToBlob "- PaaS Business Case: $paasBusinessCaseName"
+        Write-LogToBlob "- IaaS Business Case: $iaasBusinessCaseName"
+        Write-LogToBlob "- Heterogeneous Assessment: $heteroAssessmentName"
     }
     catch {
         Write-LogToBlob "=== Azure Migrate Configuration Failed ===" "ERROR"
@@ -583,9 +1135,10 @@ function Invoke-AzureMigrateConfiguration {
 
 # Execute the main function
 try {
-    Invoke-AzureMigrateConfiguration -EnvironmentName $environmentName
-}
-catch {
+    Invoke-AzureMigrateConfiguration `
+        -SkillableEnvironment $skillableEnvironment `
+        -EnvironmentName $environmentName
+} catch {
     Write-Host "Script execution failed: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
