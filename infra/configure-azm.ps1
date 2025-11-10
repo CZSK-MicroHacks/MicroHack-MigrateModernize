@@ -1,12 +1,12 @@
-Set-StrictMode -Version 3.0
+#Set-StrictMode -Version 3.0
 
 ######################################################
 ##############   CONFIGURATIONS   ###################
 ######################################################
 
-$SkillableEnvironment = $false
-$environmentName = "crgmig25" # Set your environment name here for non-Skillable environments
-$ScriptVersion = "1.0.0"
+$SkillableEnvironment = $true
+$environmentName = "" # Set your environment name here for non-Skillable environments
+$ScriptVersion = "3.0.0"
 
 ######################################################
 ##############   INFRASTRUCTURE FUNCTIONS   #########
