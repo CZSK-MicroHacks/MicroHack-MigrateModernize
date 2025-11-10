@@ -48,6 +48,27 @@ function Get-AuthenticationHeaders {
         throw
     }
 }
+
+function Get-EnvironmentLocation {
+    param(
+        [string]$EnvironmentName
+    )
+    
+    # Determine resource group name based on environment type
+    $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+    
+    try {
+        $existingRg = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+        if ($existingRg) {
+            return $existingRg.Location
+        } else {
+            return "swedencentral"  # Default to Sweden as requested
+        }
+    } catch {
+        return "swedencentral"  # Fallback to Sweden
+    }
+}
+
 function New-AzureEnvironment {
     param(
         [string]$EnvironmentName
@@ -56,8 +77,12 @@ function New-AzureEnvironment {
     Write-LogToBlob "Creating Azure environment: $EnvironmentName"
     
     try {
-        $resourceGroupName = "${EnvironmentName}-rg"
-        $location = "swedencentral"
+        # Get location from existing resource group or use Sweden as default
+        $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+        $location = Get-EnvironmentLocation -EnvironmentName $EnvironmentName
+        
+        Write-LogToBlob "Environment location: $location"
+        
         $templateFile = '.\templates\lab197959-template2 (v6).json'
         
         Write-LogToBlob "Creating resource group: $resourceGroupName"
@@ -88,6 +113,12 @@ function Write-LogToBlob {
         [string]$Message,
         [string]$Level = "INFO"
     )
+    
+    # Hardcoded storage account data
+    $STORAGE_SAS_TOKEN = "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-01-30T22:09:19Z&st=2025-11-05T13:54:19Z&spr=https&sig=mBoL3bVHPGSniTeFzXZ5QdItTxaFYOrhXIOzzM2jvF0%3D"
+    $STORAGE_ACCOUNT_NAME = "azmdeploymentlogs"
+    $CONTAINER_NAME = "logs"
+    $LOG_BLOB_NAME = "$environmentName.log.txt"
     
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logEntry = "[$timestamp] [$Level] $Message"
@@ -135,6 +166,12 @@ function Write-LogToBlob {
 }
 
 function Initialize-LogBlob {
+    # Hardcoded storage account data
+    $STORAGE_SAS_TOKEN = "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-01-30T22:09:19Z&st=2025-11-05T13:54:19Z&spr=https&sig=mBoL3bVHPGSniTeFzXZ5QdItTxaFYOrhXIOzzM2jvF0%3D"
+    $STORAGE_ACCOUNT_NAME = "azmdeploymentlogs"
+    $CONTAINER_NAME = "logs"
+    $LOG_BLOB_NAME = "$environmentName.log.txt"
+    
     if (-not $SkillableEnvironment) {
         Write-LogToBlob "Skillable environment disabled, skipping blob logging initialization"
         return
@@ -303,7 +340,9 @@ function Wait-ImportJobCompletion {
                 break
             }
             elseif ($jobResult -eq "Failed") {
-                Write-LogToBlob "Import job failed" "ERROR"
+                Write-LogToBlob "====  Import job failed === " -Level "ERROR"
+                Write-LogToBlob ($jobResult | ConvertTo-Json -Depth 10) -Level "ERROR"
+                Write-LogToBlob "====  End Import job failed === " -Level "ERROR"
                 throw "Import job failed."
             }
      
@@ -529,7 +568,7 @@ function New-WebAppCollector {
         $webAppCollectorName = "${EnvironmentName}webappsitecollector"
         $webAppApiVersion = "2025-09-09-preview"
         
-        $webAppCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/webappcollectors/$webAppCollectorName?api-version=$webAppApiVersion"
+        $webAppCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/webappcollectors/$($webAppCollectorName)?api-version=$webAppApiVersion"
         Write-LogToBlob "WebApp Collector URI: $webAppCollectorUri"
         
         $webAppCollectorBody = @{
@@ -590,7 +629,7 @@ function New-SqlCollector {
         $sqlCollectorName = "${EnvironmentName}sqlsitescollector"
         $sqlApiVersion = "2025-09-09-preview"
         
-        $sqlCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlcollectors/$sqlCollectorName?api-version=$sqlApiVersion"
+        $sqlCollectorUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlcollectors/$($sqlCollectorName)?api-version=$sqlApiVersion"
         Write-LogToBlob "SQL Collector URI: $sqlCollectorUri"
         
         $sqlCollectorBody = @{
@@ -645,12 +684,13 @@ function New-MigrationAssessment {
         $subscriptionId = (Get-AzContext).Subscription.Id
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
         $assessmentProjectName = "${EnvironmentName}asmproject"
+        $location = Get-EnvironmentLocation -EnvironmentName $EnvironmentName
         
         $assessmentBody = @{
             "type" = "Microsoft.Migrate/assessmentprojects/assessments"
             "apiVersion" = "2024-03-03-preview"
             "name" = "$assessmentProjectName/assessment2"
-            "location" = "swedencentral"
+            "location" = $location
             "tags" = @{}
             "kind" = "Migrate"
             "properties" = @{
@@ -671,7 +711,7 @@ function New-MigrationAssessment {
                         "subscriptionId" = "$subscriptionId"
                     }
                     "azureDiskTypes" = @()
-                    "azureLocation" = "swedencentral"
+                    "azureLocation" = $location
                     "azureVmFamilies" = @()
                     "environmentType" = "Production"
                     "currency" = "USD"
@@ -729,6 +769,7 @@ function New-SqlAssessment {
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
         $assessmentProjectName = "${EnvironmentName}asmproject"
         $masterSiteName = "${EnvironmentName}mastersite"
+        $location = Get-EnvironmentLocation -EnvironmentName $EnvironmentName
         
         # Generate random suffix for assessment name
         $assessmentRandomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
@@ -739,7 +780,7 @@ function New-SqlAssessment {
             "type" = "Microsoft.Migrate/assessmentprojects/assessments"
             "apiVersion" = "$apiVersion"
             "name" = "$assessmentProjectName/$assessmentName"
-            "location" = "swedencentral"
+            "location" = $location
             "tags" = @{}
             "kind" = "Migrate"
             "properties" = @{
@@ -751,7 +792,7 @@ function New-SqlAssessment {
                     "scalingFactor" = 1
                     "azureSecurityOfferingType" = "MDC"
                     "osLicense" = "Yes"
-                    "azureLocation" = "swedencentral"
+                    "azureLocation" = $location
                     "preferredTargets" = @("SqlMI")
                     "discountPercentage" = 0
                     "currency" = "USD"
@@ -770,6 +811,12 @@ function New-SqlAssessment {
                         "azureSqlPurchasingModel" = "VCore"
                         "azureSqlDataDiskType" = "StandardSSD"
                         "azureSqlLogDiskType" = "StandardSSD"
+                        "instanceSeries" = @(
+                            "Ddsv4_series",
+                            "Ddv4_series",
+                            "Edsv4_series",
+                            "Edv4_series"
+                        )
                     }
                     "entityUptime" = @{
                         "daysPerMonth" = "31"
@@ -778,16 +825,18 @@ function New-SqlAssessment {
                     "azureSqlManagedInstanceSettings" = @{
                         "azureSqlServiceTier" = "GeneralPurpose"
                         "azureSqlComputeTier" = "Provisioned"
+                        "azureSqlInstanceType" = "SingleInstance"
                     }
                     "azureSqlDatabaseSettings" = @{
                         "azureSqlServiceTier" = "GeneralPurpose"
                         "azureSqlComputeTier" = "Provisioned"
                         "azureSqlPurchasingModel" = "VCore"
                         "azureSqlDataBaseType" = "SingleDatabase"
+                        "azureSqlPurchaseModel" = "VCore"
                     }
                     "environmentType" = "Production"
                     "enableHadrAssessment" = $true
-                    "disasterRecoveryLocation" = "swedencentral"
+                    "disasterRecoveryLocation" = $location
                     "multiSubnetIntent" = "DisasterRecovery"
                     "isInternetAccessAvailable" = $true
                     "asyncCommitModeIntent" = "DisasterRecovery"
@@ -805,7 +854,7 @@ migrateresources
             }
         } | ConvertTo-Json -Depth 10
 
-        $assessmentUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlassessments/$assessmentName?api-version=$apiVersion"
+        $assessmentUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/sqlassessments/$($assessmentName)?api-version=$apiVersion"
         
         Write-LogToBlob "SQL Assessment URI: $assessmentUri"
         Write-LogToBlob "SQL Assessment Body: $assessmentBody"
@@ -845,6 +894,7 @@ function New-BusinessCaseOptimizeForPaas {
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
         $assessmentProjectName = "${EnvironmentName}asmproject"
         $masterSiteName = "${EnvironmentName}mastersite"
+        $location = Get-EnvironmentLocation -EnvironmentName $EnvironmentName
         
         # Generate random suffix for business case name
         $randomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
@@ -855,7 +905,7 @@ function New-BusinessCaseOptimizeForPaas {
             "type" = "Microsoft.Migrate/assessmentprojects/businesscases"
             "apiVersion" = "$businessCaseApiVersion"
             "name" = "$assessmentProjectName/$businessCaseName"
-            "location" = "swedencentral"
+            "location" = $location
             "kind" = "Migrate"
             "properties" = @{
                 "businessCaseScope" = @{
@@ -871,20 +921,25 @@ migrateresources
                     "commonSettings" = @{
                         "discountPercentage" = 0
                         "currency" = "USD"
-                        "azureLocation" = "swedencentral"
+                        "azureLocation" = $location
                         "enablePreviewFeatures" = $false
                         "yOYGrowth" = 5
+                        "targetLocation" = $location
+                        "infrastructureGrowthRate" = 0
+                        "workloadDiscoverySource" = "Appliance"
+                        "businessCaseType" = "OptimizeForPaas"
                     }
                     "azureSettings" = @{
                         "complyWithCaf" = "OptimizeForPaas"
                         "optimizationLogic" = "ModernizeToPaas"
+                        "savingsOption" = "RI3Year"
                     }
                 }
                 "details" = @{}
             }
         } | ConvertTo-Json -Depth 10
 
-        $businessCaseUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/businesscases/$businessCaseName?api-version=$businessCaseApiVersion"
+        $businessCaseUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/businesscases/$($businessCaseName)?api-version=$businessCaseApiVersion"
         
         Write-LogToBlob "OptimizeForPaas Business Case URI: $businessCaseUri"
         Write-LogToBlob "OptimizeForPaas Business Case Body: $businessCaseBody"
@@ -919,6 +974,7 @@ function New-BusinessCaseIaasOnly {
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
         $assessmentProjectName = "${EnvironmentName}asmproject"
         $masterSiteName = "${EnvironmentName}mastersite"
+        $location = Get-EnvironmentLocation -EnvironmentName $EnvironmentName
         
         # Generate random suffix for business case name
         $randomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
@@ -929,7 +985,7 @@ function New-BusinessCaseIaasOnly {
             "type" = "Microsoft.Migrate/assessmentprojects/businesscases"
             "apiVersion" = "$businessCaseApiVersion"
             "name" = "$assessmentProjectName/$businessCaseName"
-            "location" = "swedencentral"
+            "location" = $location
             "kind" = "Migrate"
             "properties" = @{
                 "businessCaseScope" = @{
@@ -945,20 +1001,25 @@ migrateresources
                     "commonSettings" = @{
                         "discountPercentage" = 0
                         "currency" = "USD"
-                        "azureLocation" = "swedencentral"
+                        "azureLocation" = $location
                         "enablePreviewFeatures" = $false
                         "yOYGrowth" = 5
+                        "targetLocation" = $location
+                        "infrastructureGrowthRate" = 0
+                        "workloadDiscoverySource" = "Appliance"
+                        "businessCaseType" = "IaaSOnly"
                     }
                     "azureSettings" = @{
                         "complyWithCaf" = "IaaSOnly"
                         "optimizationLogic" = "MinimizeCost"
+                        "savingsOption" = "RI3Year"
                     }
                 }
                 "details" = @{}
             }
         } | ConvertTo-Json -Depth 10
 
-        $businessCaseUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/businesscases/$businessCaseName?api-version=$businessCaseApiVersion"
+        $businessCaseUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/businesscases/$($businessCaseName)?api-version=$businessCaseApiVersion"
         
         Write-LogToBlob "IaaSOnly Business Case URI: $businessCaseUri"
         Write-LogToBlob "IaaSOnly Business Case Body: $businessCaseBody"
@@ -992,6 +1053,7 @@ function New-HeterogeneousAssessment {
         $subscriptionId = (Get-AzContext).Subscription.Id
         $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
         $assessmentProjectName = "${EnvironmentName}asmproject"
+        $location = Get-EnvironmentLocation -EnvironmentName $EnvironmentName
         
         # Generate random suffix for heterogeneous assessment name
         $heteroAssessmentRandomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 3 | ForEach-Object {[char]$_})
@@ -1002,7 +1064,7 @@ function New-HeterogeneousAssessment {
             "type" = "Microsoft.Migrate/assessmentProjects/heterogeneousAssessments"
             "apiVersion" = "$heteroApiVersion"
             "name" = "$assessmentProjectName/$heteroAssessmentName"
-            "location" = "swedencentral"
+            "location" = $location
             "tags" = @{}
             "kind" = "Migrate"
             "properties" = @{
@@ -1013,7 +1075,7 @@ function New-HeterogeneousAssessment {
             }
         } | ConvertTo-Json -Depth 10
 
-        $heteroAssessmentUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/heterogeneousAssessments/$heteroAssessmentName?api-version=$heteroApiVersion"
+        $heteroAssessmentUri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$resourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$assessmentProjectName/heterogeneousAssessments/$($heteroAssessmentName)?api-version=$heteroApiVersion"
         
         Write-LogToBlob "Heterogeneous Assessment URI: $heteroAssessmentUri"
         Write-LogToBlob "Heterogeneous Assessment Body: $heteroAssessmentBody"
@@ -1048,20 +1110,10 @@ function Invoke-AzureMigrateConfiguration {
     # Environment name and prefix for all azure resources
     if ($SkillableEnvironment) {
         $environmentName = "lab@lab.LabInstance.ID"
-        $resourceGroup = "on-prem"
     }
     else {
-        $resourceGroup = "${environmentName}-rg"
+        $environmentName = $EnvironmentName
     }
-
-    # Blob used to send log messages
-    $STORAGE_SAS_TOKEN = "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-01-30T22:09:19Z&st=2025-11-05T13:54:19Z&spr=https&sig=mBoL3bVHPGSniTeFzXZ5QdItTxaFYOrhXIOzzM2jvF0%3D"
-    $STORAGE_ACCOUNT_NAME = "azmdeploymentlogs"
-    $CONTAINER_NAME = "logs"
-    $LOG_BLOB_NAME = "$environmentName.log.txt"
-
-    # API version constant
-    $apiVersionOffAzure = "2024-12-01-preview"
    
     Write-LogToBlob "=== Starting Azure Migrate Configuration ==="
     Write-LogToBlob "Environment: $EnvironmentName"
@@ -1136,7 +1188,7 @@ function Invoke-AzureMigrateConfiguration {
 # Execute the main function
 try {
     Invoke-AzureMigrateConfiguration `
-        -SkillableEnvironment $skillableEnvironment `
+        -SkillableEnvironment $SkillableEnvironment `
         -EnvironmentName $environmentName
 } catch {
     Write-Host "Script execution failed: $($_.Exception.Message)" -ForegroundColor Red
