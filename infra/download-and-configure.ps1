@@ -4,24 +4,26 @@
 
 # Configuration
 $ScriptUrl = "https://github.com/crgarcia12/migrate-modernize-lab/raw/refs/heads/main/infra/configure-azm.ps1"
-$TempPath = $env:TEMP
 $ScriptVersion = "9.0.0"
 
+# Environment configuration for this script
+$script:DownloadEnvironmentName = "lab@lab.LabInstance.ID"
+
 # Script-level variables to track logging state and buffer (Download script specific)
+
 $script:DownloadLoggingInitialized = $false
 $script:DownloadLogBuffer = [System.Text.StringBuilder]::new()
 $script:DownloadStorageContext = $null
-
 ######################################################
 ##############   LOGGING FUNCTIONS   ################
 ######################################################
 
-function Write-LogToBlob {
+function Write-DownloadLogToBlob {
     param(
         [string]$Message,
         [string]$Level = "INFO"
     )
-    
+
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $logEntry = "[$timestamp] [$Level] $Message"
     
@@ -56,8 +58,7 @@ function Write-DownloadBufferToBlob {
     $DOWNLOAD_STORAGE_SAS_TOKEN = "?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2026-01-30T22:09:19Z&st=2025-11-05T13:54:19Z&spr=https&sig=mBoL3bVHPGSniTeFzXZ5QdItTxaFYOrhXIOzzM2jvF0%3D"
     $DOWNLOAD_STORAGE_ACCOUNT_NAME = "azmdeploymentlogs"
     $DOWNLOAD_CONTAINER_NAME = "logs"
-    $downloadEnvironmentName = "@lab.LabInstance.ID"
-    $DOWNLOAD_LOG_BLOB_NAME = "$downloadEnvironmentName.download.txt"
+    $DOWNLOAD_LOG_BLOB_NAME = "$script:DownloadEnvironmentName.download.txt"
     
     # Auto-initialize logging if not already done
     if (-not $script:DownloadLoggingInitialized) {
@@ -67,7 +68,7 @@ function Write-DownloadBufferToBlob {
             $script:DownloadStorageContext = New-AzStorageContext -StorageAccountName $DOWNLOAD_STORAGE_ACCOUNT_NAME -SasToken $DOWNLOAD_STORAGE_SAS_TOKEN
             
             # Initialize the log buffer with header
-            $initialLog = "=== Download Script [$ScriptVersion] execution started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===`nEnvironment: $downloadEnvironmentName`n"
+            $initialLog = "=== Download Script [$ScriptVersion] execution started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===`nEnvironment: $script:DownloadEnvironmentName`n"
             $null = $script:DownloadLogBuffer.AppendLine($initialLog)
             
             Write-Host "Initialized download log blob: $DOWNLOAD_LOG_BLOB_NAME" -ForegroundColor Green
@@ -81,7 +82,7 @@ function Write-DownloadBufferToBlob {
             
             # Fallback to local file
             $localLogFile = ".\download-script-execution.log"
-            $initialLog = "=== Download Script execution started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===`nEnvironment: $downloadEnvironmentName`n"
+            $initialLog = "=== Download Script execution started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===`nEnvironment: $script:DownloadEnvironmentName`n"
             Set-Content -Path $localLogFile -Value $initialLog -NoNewline
             Write-Host "Created local log file as fallback: $localLogFile" -ForegroundColor Yellow
             $script:DownloadLoggingInitialized = $true
@@ -108,67 +109,65 @@ function Write-DownloadBufferToBlob {
 
 # Set error action preference to stop on errors
 $ErrorActionPreference = "Stop"
-Write-LogToBlob "=== Starting download and configuration process ==="
+Write-DownloadLogToBlob "=== Starting download and configuration process ==="
 
-Write-LogToBlob "Importing Az modules. Make sure ARM modules are not loaded..."
+Write-DownloadLogToBlob "Importing Az modules. Make sure ARM modules are not loaded..."
 Import-Module Az.Accounts, Az.Resources -Force
 Get-Module -Name AzureRM* | Remove-Module -Force
 
 # Check current execution policy and handle automatically
 $CurrentExecutionPolicy = Get-ExecutionPolicy
-Write-LogToBlob "Current PowerShell execution policy: $CurrentExecutionPolicy"
+Write-DownloadLogToBlob "Current PowerShell execution policy: $CurrentExecutionPolicy"
 
 try {
     # Create a temporary file path
     $TempScriptPath = Join-Path (Get-Location).Path "configure-azm.ps1"
     
-    Write-LogToBlob "Downloading script from: $ScriptUrl"
-    Write-LogToBlob "Temporary location: $TempScriptPath"
-    Write-LogToBlob "Subscription ID: '${(Get-AzContext).Subscription.Id}'"
+    Write-DownloadLogToBlob "Downloading script from: $ScriptUrl"
+    Write-DownloadLogToBlob "Temporary location: $TempScriptPath"
+    Write-DownloadLogToBlob "Subscription ID: '${(Get-AzContext).Subscription.Id}'"
 
     # Download the script
     Invoke-WebRequest -Uri $ScriptUrl -OutFile $TempScriptPath -UseBasicParsing
     if ($TempScriptPath -and (Test-Path $TempScriptPath)) {
-        Write-LogToBlob "Script downloaded successfully!"
+        Write-DownloadLogToBlob "Script downloaded successfully!"
         # Verify the file is not empty
         $FileSize = (Get-Item $TempScriptPath).Length
         if ($FileSize -gt 0) {
-            Write-LogToBlob "File size: $FileSize bytes"
+            Write-DownloadLogToBlob "File size: $FileSize bytes"
             # Unblock the downloaded file to remove the "downloaded from internet" flag
-            Write-LogToBlob "Unblocking downloaded script..."
+            Write-DownloadLogToBlob "Unblocking downloaded script..."
             try {
                 Unblock-File -Path $TempScriptPath
-                Write-LogToBlob "Script unblocked successfully!"
+                Write-DownloadLogToBlob "Script unblocked successfully!"
             }
             catch {
-                Write-LogToBlob "Could not unblock file: $($_.Exception.Message)" "WARN"
-                Write-LogToBlob "Continuing with execution..."
+                Write-DownloadLogToBlob "Could not unblock file: $($_.Exception.Message)" "WARN"
+                Write-DownloadLogToBlob "Continuing with execution..."
             }
-            # Replace <LABINSTANCEID> placeholder with @lab.LabInstance.ID
-            Write-LogToBlob "Processing script content to replace placeholders..."
+            # Replace <LABINSTANCEID> placeholder with DownloadEnvironmentName
+            Write-DownloadLogToBlob "Processing script content to replace placeholders..."
             try {
                 $ScriptContent = Get-Content -Path $TempScriptPath -Raw
                 if ($ScriptContent -match "<LABINSTANCEID>") {
-                    $ModifiedContent = $ScriptContent -replace "<LABINSTANCEID>", "@lab.LabInstance.ID"
+                    $ModifiedContent = $ScriptContent -replace "<LABINSTANCEID>", $script:DownloadEnvironmentName
                     Set-Content -Path $TempScriptPath -Value $ModifiedContent -NoNewline
-                    Write-LogToBlob "Replaced <LABINSTANCEID> with @lab.LabInstance.ID"
+                    Write-DownloadLogToBlob "Replaced <LABINSTANCEID> with $script:DownloadEnvironmentName"
                 }
                 else {
-                    Write-LogToBlob "No <LABINSTANCEID> placeholder found in script."
+                    Write-DownloadLogToBlob "No <LABINSTANCEID> placeholder found in script."
                 }
             }
             catch {
-                Write-LogToBlob "Could not process script content: $($_.Exception.Message)" "WARN"
-                Write-LogToBlob "Continuing with original script..."
+                Write-DownloadLogToBlob "Could not process script content: $($_.Exception.Message)" "WARN"
+                Write-DownloadLogToBlob "Continuing with original script..."
             }
-            Write-LogToBlob "Executing downloaded script..."
-            # Always use PowerShell with bypass to ensure execution in non-interactive mode
-            Write-LogToBlob "Using execution policy bypass to ensure script runs..."
+            Write-DownloadLogToBlob "Executing downloaded script..."
             . $TempScriptPath
 
             
             # & pwsh -ExecutionPolicy Bypass -File $TempScriptPath
-            Write-LogToBlob "Downloaded script execution completed!"
+            Write-DownloadLogToBlob "Downloaded script execution completed!"
         }
         else {
             throw "Downloaded file is empty or corrupted."
@@ -179,7 +178,7 @@ try {
     }
 }
 catch {
-    Write-LogToBlob "An error occurred: $($_.Exception.Message)" "ERROR"
+    Write-DownloadLogToBlob "An error occurred: $($_.Exception.Message)" "ERROR"
     exit 1
 }
 finally {
@@ -187,12 +186,12 @@ finally {
     if (Test-Path $TempScriptPath) {
         try {
             Remove-Item $TempScriptPath -Force
-            Write-LogToBlob "Temporary file cleaned up."
+            Write-DownloadLogToBlob "Temporary file cleaned up."
         }
         catch {
-            Write-LogToBlob "Could not clean up temporary file: $TempScriptPath" "WARN"
+            Write-DownloadLogToBlob "Could not clean up temporary file: $TempScriptPath" "WARN"
         }
     }
 }
 
-Write-LogToBlob "Download and configure process completed."
+Write-DownloadLogToBlob "Download and configure process completed."
