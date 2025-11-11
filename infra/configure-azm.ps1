@@ -40,7 +40,7 @@ function Get-AuthenticationHeaders {
             "authorization" = "Bearer $token"
             "content-type"  = "application/json"
         }
-        
+        Write-LogToBlob ($headers | Out-String)
         Write-LogToBlob "Authentication headers obtained successfully"
         
         return $headers
@@ -207,6 +207,72 @@ function Write-BufferToBlob {
 ##############   MIGRATE TOOL FUNCTIONS   ###########
 ######################################################
 
+function Wait-ForAzureMigrateProject {
+    param(
+        [string]$SubscriptionId,
+        [string]$ResourceGroupName,
+        [string]$MigrateProjectName,
+        [int]$MaxWaitTimeMinutes = 10
+    )
+    
+    Write-LogToBlob "Waiting for Azure Migrate project to be ready: $MigrateProjectName"
+    Write-LogToBlob "This project should be created by the Skillable ARM template"
+    
+    $Headers = Get-AuthenticationHeaders
+    $checkProjectApi = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/MigrateProjects/$MigrateProjectName" + "?api-version=2020-06-01-preview"
+    
+    $startTime = Get-Date
+    $timeout = $startTime.AddMinutes($MaxWaitTimeMinutes)
+    $checkCount = 0
+    
+    Write-LogToBlob "Checking project availability at URI: $checkProjectApi"
+    Write-LogToBlob "Will wait up to $MaxWaitTimeMinutes minutes for the project to be ready"
+    
+    while ((Get-Date) -lt $timeout) {
+        $checkCount++
+        # Start with shorter waits, then increase
+        $waitSeconds = if ($checkCount -le 3) { 15 } elseif ($checkCount -le 6) { 30 } else { 45 }
+        
+        try {
+            Write-LogToBlob "Check #$checkCount - Verifying Azure Migrate project existence..."
+            $response = Invoke-RestMethod -Uri $checkProjectApi -Method GET -Headers $Headers -ContentType 'application/json'
+            
+            if ($response -and $response.properties) {
+                $provisioningState = $response.properties.provisioningState
+                Write-LogToBlob "Azure Migrate project found! Provisioning state: $provisioningState"
+                
+                if ($provisioningState -eq "Succeeded" -or $provisioningState -eq "Created") {
+                    Write-LogToBlob "Azure Migrate project is ready and available for tool registration!"
+                    return $true
+                }
+                elseif ($provisioningState -eq "Failed") {
+                    Write-LogToBlob "Azure Migrate project provisioning failed!" "ERROR"
+                    throw "Azure Migrate project provisioning failed"
+                }
+                else {
+                    Write-LogToBlob "Azure Migrate project is still being provisioned (state: $provisioningState). Waiting $waitSeconds seconds..." "WARN"
+                }
+            }
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+            if ($errorMessage -like "*404*" -or $errorMessage -like "*Not Found*") {
+                Write-LogToBlob "Azure Migrate project not found yet (Check #$checkCount). Skillable ARM template is likely still creating resources. Waiting $waitSeconds seconds..." "WARN"
+            }
+            else {
+                Write-LogToBlob "Error checking Azure Migrate project: $errorMessage" "WARN"
+            }
+        }
+        
+        Start-Sleep -Seconds $waitSeconds
+    }
+    
+    $elapsedMinutes = [math]::Round(((Get-Date) - $startTime).TotalMinutes, 1)
+    Write-LogToBlob "Timeout waiting for Azure Migrate project to be ready after $elapsedMinutes minutes ($checkCount checks)" "ERROR"
+    Write-LogToBlob "The Skillable ARM template may still be deploying or there may be an issue with the deployment" "ERROR"
+    throw "Timeout waiting for Azure Migrate project '$MigrateProjectName' to be ready after $MaxWaitTimeMinutes minutes"
+}
+
 function Register-MigrateTools {
     param(
         [string]$SubscriptionId,
@@ -218,8 +284,8 @@ function Register-MigrateTools {
     
     try {
         $Headers = Get-AuthenticationHeaders
-        $registerToolApi = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/MigrateProjects/$MigrateProjectName/registerTool?api-version=2020-06-01-preview"
-        
+        $registerToolApi = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/MigrateProjects/$migrateProjectName/registerTool?api-version=2020-06-01-preview"
+     
         Write-LogToBlob "Registering Server Discovery tool"
         Write-LogToBlob "URI: $registerToolApi"
         Invoke-RestMethod -Uri $registerToolApi `
@@ -1136,35 +1202,40 @@ function Invoke-AzureMigrateConfiguration {
             New-AzureEnvironment -EnvironmentName $environmentName -ResourceGroupName $resourceGroupName -Location $location
         }
         
-        # Step 3: Register Azure Migrate tools
+        # Step 3: Wait for Azure Migrate project to be ready (created by Skillable ARM template)
+        if ($SkillableEnvironment) {
+            Wait-ForAzureMigrateProject -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -MigrateProjectName $migrateProjectName
+        }
+        
+        # Step 4: Register Azure Migrate tools
         Register-MigrateTools -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -MigrateProjectName $migrateProjectName
         
-        # Step 4: Download and import discovery artifacts
+        # Step 5: Download and import discovery artifacts
         $localZipPath = Get-DiscoveryArtifacts
         $jobArmId = Start-ArtifactImport -LocalZipFilePath $localZipPath -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -MasterSiteName $masterSiteName
         Wait-ImportJobCompletion -JobArmId $jobArmId
         
-        # Step 5: Get site details for WebApp and SQL
+        # Step 6: Get site details for WebApp and SQL
         $webAppSiteDetails = Get-WebAppSiteDetails -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -MasterSiteName $masterSiteName -WebAppSiteName $webAppSiteName
         $sqlSiteDetails = Get-SqlSiteDetails -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -MasterSiteName $masterSiteName -SqlSiteName $sqlSiteName
         
-        # Step 6: Configure VMware Collector
+        # Step 7: Configure VMware Collector
         $agentId = Get-VMwareCollectorAgentId -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -VMwareSiteName $vmwareSiteName
         Invoke-VMwareCollectorSync -AgentId $agentId -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -EnvironmentName $environmentName -VMwareSiteName $vmwareSiteName
         
-        # Step 7: Create WebApp and SQL Collectors (if available)
+        # Step 8: Create WebApp and SQL Collectors (if available)
         $webAppCollectorCreated = New-WebAppCollector -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -EnvironmentName $environmentName -WebAppSiteId $webAppSiteDetails.SiteId -WebAppAgentId $webAppSiteDetails.AgentId
         $sqlCollectorCreated = New-SqlCollector -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -EnvironmentName $environmentName -SqlSiteId $sqlSiteDetails.SiteId -SqlAgentId $sqlSiteDetails.AgentId
         
-        # Step 8: Create assessments
+        # Step 9: Create assessments
         $vmAssessmentId = New-VMAssessment -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -Location $location -VMwareSiteName $vmwareSiteName
         $sqlAssessmentId = New-SqlAssessment -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -Location $location -VMwareSiteName $vmwareSiteName -MasterSiteName $masterSiteName -WebAppSiteName $webAppSiteName -SqlSiteName $sqlSiteName
         
-        # Step 9: Create business cases
+        # Step 10: Create business cases
         $paasBusinessCaseName = New-BusinessCaseOptimizeForPaas -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -Location $location -VMwareSiteName $vmwareSiteName -MasterSiteName $masterSiteName -WebAppSiteName $webAppSiteName -SqlSiteName $sqlSiteName
         $iaasBusinessCaseName = New-BusinessCaseIaasOnly -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -Location $location -VMwareSiteName $vmwareSiteName -MasterSiteName $masterSiteName -WebAppSiteName $webAppSiteName -SqlSiteName $sqlSiteName
         
-        # Step 10: Create global assessment
+        # Step 11: Create global assessment
         $heteroAssessmentName = New-GlobalAssessment -SubscriptionId $subscriptionId -ResourceGroupName $resourceGroupName -AssessmentProjectName $assessmentProjectName -Location $location -VmAssessmentId $vmAssessmentId -SqlAssessmentId $sqlAssessmentId
         
         Write-LogToBlob "=== Azure Migrate Configuration Completed Successfully ==="
