@@ -5,7 +5,7 @@
 # Configuration
 $ScriptUrl = "https://github.com/crgarcia12/migrate-modernize-lab/raw/refs/heads/main/infra/configure-azm.ps1"
 $TempPath = $env:TEMP
-$ScriptVersion = "5.0.0"
+$ScriptVersion = "6.0.0"
 
 # Script-level variable to track if logging has been initialized
 $script:LoggingInitialized = $false
@@ -130,8 +130,11 @@ function Initialize-LogBlob {
 
 # Set error action preference to stop on errors
 $ErrorActionPreference = "Stop"
+Write-LogToBlob "=== Starting download and configuration process ==="
 
-Write-LogToBlob "Starting download and configuration process..."
+Write-LogToBlob "Importing Az modules. Make sure ARM modules are not loaded..."
+Import-Module Az.Accounts, Az.Resources -Force
+Get-Module -Name AzureRM* | Remove-Module -Force
 
 # Check current execution policy and handle automatically
 $CurrentExecutionPolicy = Get-ExecutionPolicy
@@ -143,6 +146,7 @@ try {
     
     Write-LogToBlob "Downloading script from: $ScriptUrl"
     Write-LogToBlob "Temporary location: $TempScriptPath"
+    Write-LogToBlob "Subscription ID: '${(Get-AzContext).Subscription.Id}'"
 
     # Download the script
     Invoke-WebRequest -Uri $ScriptUrl -OutFile $TempScriptPath -UseBasicParsing
@@ -182,8 +186,9 @@ try {
             Write-LogToBlob "Executing downloaded script..."
             # Always use PowerShell with bypass to ensure execution in non-interactive mode
             Write-LogToBlob "Using execution policy bypass to ensure script runs..."
-            & pwsh -ExecutionPolicy Bypass -File $TempScriptPath
-            Write-LogToBlob "Script execution completed!"
+            . $TempScriptPath
+            # & pwsh -ExecutionPolicy Bypass -File $TempScriptPath
+            Write-LogToBlob "Downloaded script execution completed!"
         }
         else {
             throw "Downloaded file is empty or corrupted."

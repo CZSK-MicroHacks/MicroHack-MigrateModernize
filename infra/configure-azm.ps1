@@ -5,8 +5,8 @@
 ######################################################
 
 $SkillableEnvironment = $true
-$environmentName = "" # Set your environment name here for non-Skillable environments
-$ScriptVersion = "5.0.0"
+$EnvironmentName = "" # Set your environment name here for non-Skillable environments
+$ScriptVersion = "6.0.0"
 
 ######################################################
 ##############   INFRASTRUCTURE FUNCTIONS   #########
@@ -21,6 +21,7 @@ function Import-AzureModules {
     
     Write-LogToBlob "Azure PowerShell modules imported successfully"
 }
+
 function Get-AuthenticationHeaders {
     Write-LogToBlob "Getting access token for REST API calls"
     
@@ -52,20 +53,20 @@ function Get-AuthenticationHeaders {
 
 function Get-EnvironmentLocation {
     param(
-        [string]$EnvironmentName
+        [string]$ResourceGroupName
     )
     
-    # Determine resource group name based on environment type
-    $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
-    
+    # Determine resource group name based on environment type   
     try {
-        $existingRg = Get-AzResourceGroup -Name $resourceGroupName -ErrorAction SilentlyContinue
+        $existingRg = Get-AzResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue
         if ($existingRg) {
             return $existingRg.Location
         } else {
+            Write-LogToBlob "Resource group '$ResourceGroupName' not found. Defaulting to 'swedencentral'." -Level "WARN"
             return "swedencentral"  # Default to Sweden as requested
         }
     } catch {
+        Write-LogToBlob "Error retrieving resource group: $($_.Exception.Message). Defaulting to 'swedencentral'." -Level "ERROR"
         return "swedencentral"  # Fallback to Sweden
     }
 }
@@ -1116,10 +1117,10 @@ function Invoke-AzureMigrateConfiguration {
         $environmentName = $EnvironmentName
     }
 
-    # Define all resource names in one place
+    # Define all resource names
     $subscriptionId = (Get-AzContext).Subscription.Id
     $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${environmentName}-rg" }
-    $location = Get-EnvironmentLocation -EnvironmentName $environmentName
+    $location = Get-EnvironmentLocation -ResourceGroupName $resourceGroupName
     $masterSiteName = "${environmentName}mastersite"
     $migrateProjectName = "${environmentName}-azm"
     $assessmentProjectName = "${environmentName}asmproject"
@@ -1127,14 +1128,23 @@ function Invoke-AzureMigrateConfiguration {
     $webAppSiteName = "${environmentName}webappsite"
     $sqlSiteName = "${environmentName}sqlsites"
     
+    # Log all variable values
+    Write-LogToBlob "===============================  VARIABLES ================================"
+    Write-LogToBlob "Skillable Mode: $SkillableEnvironment" 
+    Write-LogToBlob "Environment Name: $environmentName"
+    Write-LogToBlob "Subscription ID: $subscriptionId"
+    Write-LogToBlob "Resource Group Name: $resourceGroupName"
+    Write-LogToBlob "Location: $location"
+    Write-LogToBlob "Master Site Name: $masterSiteName"
+    Write-LogToBlob "Migrate Project Name: $migrateProjectName"
+    Write-LogToBlob "Assessment Project Name: $assessmentProjectName"
+    Write-LogToBlob "VMware Site Name: $vmwareSiteName"
+    Write-LogToBlob "WebApp Site Name: $webAppSiteName"
+    Write-LogToBlob "SQL Site Name: $sqlSiteName"
+    Write-LogToBlob "===============================  VARIABLES ================================"
+
     try {
-        # Step 1: Initialize modules and log the start
-        Write-LogToBlob "=== Starting Azure Migrate Configuration ==="
-        Write-LogToBlob "Environment: $environmentName"
-        Write-LogToBlob "Skillable Mode: $SkillableEnvironment" 
-        Write-LogToBlob "Resource Group: $resourceGroupName"
-        Write-LogToBlob "Location: $location"
-        
+        # Step 1: Initialize modules and log the start       
         Import-AzureModules
 
         # Step 2: Create Azure environment (skip if Skillable)
@@ -1199,7 +1209,7 @@ function Invoke-AzureMigrateConfiguration {
 try {
     Invoke-AzureMigrateConfiguration `
         -SkillableEnvironment $SkillableEnvironment `
-        -EnvironmentName $environmentName
+        -EnvironmentName $EnvironmentName
 } catch {
     Write-Host "Script execution failed: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
