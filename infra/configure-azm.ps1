@@ -50,6 +50,65 @@ function Get-AuthenticationHeaders {
     }
 }
 
+function Invoke-RestMethodWithRetry {
+    param(
+        [string]$Uri,
+        [string]$Method = "GET",
+        [hashtable]$Headers,
+        [string]$Body = $null,
+        [string]$ContentType = "application/json",
+        [int]$MaxRetries = 1,
+        [int]$DelaySeconds = 5
+    )
+    
+    # Log the request details
+    Write-LogToBlob "REST API Call [$Method]: $Uri"
+    if ($Body) {
+        Write-LogToBlob "$Body"
+    }
+    
+    $attempt = 0
+    $maxAttempts = $MaxRetries + 1
+    
+    while ($attempt -lt $maxAttempts) {
+        $attempt++
+        try {
+            Write-LogToBlob "API Call attempt $attempt of $maxAttempts to: $Uri"
+            
+            $params = @{
+                Uri = $Uri
+                Method = $Method
+                Headers = $Headers
+                ContentType = $ContentType
+            }
+            
+            if ($Body) {
+                $params.Body = $Body
+            }
+            
+            $response = Invoke-RestMethod @params
+            
+            # Log successful response
+            Write-LogToBlob "API Call successful on attempt $attempt"
+            Write-LogToBlob "REST API Call - Response: $($response | ConvertTo-Json -Depth 10)"
+            
+            return $response
+        }
+        catch {
+            Write-LogToBlob "API Call attempt $attempt failed: $($_.Exception.Message)" "WARN"
+            
+            if ($attempt -lt $maxAttempts) {
+                Write-LogToBlob "Retrying in $DelaySeconds seconds..." "WARN"
+                Start-Sleep -Seconds $DelaySeconds
+            }
+            else {
+                Write-LogToBlob "All API retry attempts exhausted" "ERROR"
+                throw
+            }
+        }
+    }
+}
+
 function Get-AzureRegion {
     param(
         [string]$SubscriptionId,
@@ -68,7 +127,7 @@ function Get-AzureRegion {
             $headers = Get-AuthenticationHeaders
             $migrateProjectUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/MigrateProjects/$MigrateProjectName" + "?api-version=2020-06-01-preview"
             
-            $response = Invoke-RestMethod -Uri $migrateProjectUri -Method GET -Headers $headers -ContentType 'application/json'
+            $response = Invoke-RestMethodWithRetry -Uri $migrateProjectUri -Method GET -Headers $headers
             
             if ($response -and $response.location) {
                 Write-LogToBlob "Using Migrate Project location: $($response.location)"
@@ -295,7 +354,7 @@ function Wait-AzureMigrateResources {
         foreach ($resource in $resourceChecks) {
             try {
                 Write-LogToBlob "Checking $($resource.Name)..."
-                $response = Invoke-RestMethod -Uri $resource.Uri -Method GET -Headers $Headers -ContentType 'application/json'
+                $response = Invoke-RestMethodWithRetry -Uri $resource.Uri -Method GET -Headers $Headers
                 
                 if ($response) {
                     # Check provisioning state if it exists
@@ -389,18 +448,16 @@ function Register-MigrateTools {
         
         Write-LogToBlob "Registering Server Discovery tool"
         Write-LogToBlob "URI: $registerToolApi"
-        Invoke-RestMethod -Uri $registerToolApi `
+        Invoke-RestMethodWithRetry -Uri $registerToolApi `
             -Method POST `
             -Headers $Headers `
-            -ContentType 'application/json' `
             -Body '{"tool": "ServerDiscovery"}' | Out-Null
         Write-LogToBlob "Server Discovery tool registered successfully"
 
         Write-LogToBlob "Registering Server Assessment tool"
-        Invoke-RestMethod -Uri $registerToolApi `
+        Invoke-RestMethodWithRetry -Uri $registerToolApi `
             -Method POST `
             -Headers $Headers `
-            -ContentType 'application/json' `
             -Body '{"tool": "ServerAssessment"}' | Out-Null
         Write-LogToBlob "Server Assessment tool registered successfully"
     }
@@ -448,7 +505,7 @@ function Start-ArtifactImport {
         $importUriUrl = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.OffAzure/masterSites/$MasterSiteName/Import?api-version=2024-12-01-preview"
         Write-LogToBlob "Import URI: $importUriUrl"
         
-        $importResponse = Invoke-RestMethod -Uri $importUriUrl -Method POST -Headers $Headers
+        $importResponse = Invoke-RestMethodWithRetry -Uri $importUriUrl -Method POST -Headers $Headers
         $blobUri = $importResponse.uri
         $jobArmId = $importResponse.jobArmId.Trim()
 
@@ -461,7 +518,7 @@ function Start-ArtifactImport {
             "x-ms-blob-type" = "BlockBlob"
             "x-ms-version"   = "2020-04-08"
         }
-        Invoke-RestMethod -Uri $blobUri -Method PUT -Headers $uploadBlobHeaders -Body $fileBytes -ContentType "application/octet-stream"
+        Invoke-RestMethodWithRetry -Uri $blobUri -Method PUT -Headers $uploadBlobHeaders -Body $fileBytes -ContentType "application/octet-stream"
         Write-LogToBlob "Successfully uploaded ZIP to blob"
         
         return $jobArmId
@@ -496,7 +553,7 @@ function Wait-ImportJobCompletion {
                 $Headers = Get-AuthenticationHeaders
             }
             
-            $jobStatus = Invoke-RestMethod -Uri $jobUrl -Method GET -Headers $Headers
+            $jobStatus = Invoke-RestMethodWithRetry -Uri $jobUrl -Method GET -Headers $Headers
             $jobResult = $jobStatus.properties.jobResult
             Write-LogToBlob "Attempt $($attempt + 1): Job status - $jobResult"
 
@@ -548,7 +605,7 @@ function Get-WebAppSiteDetails {
         $webAppSiteUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.OffAzure/MasterSites/$MasterSiteName/WebAppSites/${WebAppSiteName}?api-version=2024-12-01-preview"
         Write-LogToBlob "WebApp Site URI: $webAppSiteUri"
 
-        $webAppSiteResponse = Invoke-RestMethod -Uri $webAppSiteUri -Method GET -Headers $Headers
+        $webAppSiteResponse = Invoke-RestMethodWithRetry -Uri $webAppSiteUri -Method GET -Headers $Headers
         $webAppSiteId = $webAppSiteResponse.id
         
         # Extract agent ID from siteAppliancePropertiesCollection
@@ -591,7 +648,7 @@ function Get-SqlSiteDetails {
         $sqlSiteUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.OffAzure/MasterSites/$MasterSiteName/SqlSites/${SqlSiteName}?api-version=2024-12-01-preview"
         Write-LogToBlob "SQL Site URI: $sqlSiteUri"
 
-        $sqlSiteResponse = Invoke-RestMethod -Uri $sqlSiteUri -Method GET -Headers $Headers
+        $sqlSiteResponse = Invoke-RestMethodWithRetry -Uri $sqlSiteUri -Method GET -Headers $Headers
         $sqlSiteId = $sqlSiteResponse.id
         
         # Extract agent ID from siteAppliancePropertiesCollection
@@ -631,7 +688,7 @@ function Get-VMwareCollectorAgentId {
     try {
         $Headers = Get-AuthenticationHeaders
         $vmwareSiteUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.OffAzure/VMwareSites/${VMwareSiteName}?api-version=2024-12-01-preview"
-        $vmwareSiteResponse = Invoke-RestMethod -Uri $vmwareSiteUri -Method GET -Headers $Headers
+        $vmwareSiteResponse = Invoke-RestMethodWithRetry -Uri $vmwareSiteUri -Method GET -Headers $Headers
         
         Write-LogToBlob "VMware Site Response received"
         Write-LogToBlob "$($vmwareSiteResponse | ConvertTo-Json -Depth 10)"
@@ -691,10 +748,9 @@ function Invoke-VMwareCollectorSync {
         Write-LogToBlob "VMware Collector Body:"
         Write-LogToBlob "$vmwareCollectorBody"
 
-        $response = Invoke-RestMethod -Uri $vmwareCollectorUri `
+        $response = Invoke-RestMethodWithRetry -Uri $vmwareCollectorUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
             -Body $vmwareCollectorBody
 
         Write-LogToBlob "VMware Collector sync response:"
@@ -755,10 +811,9 @@ function New-WebAppCollector {
             }
         } | ConvertTo-Json -Depth 10
         
-        Invoke-RestMethod -Uri $webAppCollectorUri `
+        Invoke-RestMethodWithRetry -Uri $webAppCollectorUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
             -Body $webAppCollectorBody | Out-Null
             
         Write-LogToBlob "WebApp Collector created successfully"
@@ -817,10 +872,9 @@ function New-SqlCollector {
             }
         } | ConvertTo-Json -Depth 10
         
-        Invoke-RestMethod -Uri $sqlCollectorUri `
+        Invoke-RestMethodWithRetry -Uri $sqlCollectorUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
             -Body $sqlCollectorBody | Out-Null
             
         Write-LogToBlob "SQL Collector created successfully"
@@ -902,18 +956,13 @@ migrateresources
 
         $assessmentUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/assessmentProjects/$AssessmentProjectName/assessments/${assessmentName}?api-version=$apiVersion"
         
-        Write-LogToBlob "Assessment URI: $assessmentUri"
-        Write-LogToBlob "Assessment Body: $assessmentBody"
-        
-        $response = Invoke-RestMethod `
+        $response = Invoke-RestMethodWithRetry `
             -Uri $assessmentUri `
             -Method PUT `
             -Headers $headers `
-            -ContentType 'application/json' `
             -Body $assessmentBody
 
         Write-LogToBlob "Assessment created successfully"
-        Write-LogToBlob "Assessment response: $($response | ConvertTo-Json -Depth 10)"
 
         # Extract the assessment ID from the response
         $assessmentId = $response.id
@@ -1020,18 +1069,13 @@ migrateresources
 
         $assessmentUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$AssessmentProjectName/sqlassessments/${assessmentName}?api-version=$apiVersion"
         
-        Write-LogToBlob "SQL Assessment URI: $assessmentUri"
-        Write-LogToBlob "SQL Assessment Body: $assessmentBody"
-        
-        $response = Invoke-RestMethod `
+        $response = Invoke-RestMethodWithRetry `
             -Uri $assessmentUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
             -Body $assessmentBody
 
         Write-LogToBlob "SQL Assessment created successfully"
-        Write-LogToBlob "SQL Assessment response: $($response | ConvertTo-Json -Depth 10)"
         
         # Extract the assessment ID from the response
         $assessmentId = $response.id
@@ -1102,17 +1146,12 @@ migrateresources
 
         $businessCaseUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$AssessmentProjectName/businesscases/${businessCaseName}?api-version=$businessCaseApiVersion"
         
-        Write-LogToBlob "OptimizeForPaas Business Case URI: $businessCaseUri"
-        Write-LogToBlob "OptimizeForPaas Business Case Body: $businessCaseBody"
-        
-        $response = Invoke-RestMethod -Uri $businessCaseUri `
+        Invoke-RestMethodWithRetry -Uri $businessCaseUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
-            -Body $businessCaseBody
+            -Body $businessCaseBody | Out-Null
 
         Write-LogToBlob "OptimizeForPaas Business Case created successfully"
-        Write-LogToBlob "OptimizeForPaas Business Case response: $($response | ConvertTo-Json -Depth 10)"
         
         return $businessCaseName
     }
@@ -1175,17 +1214,12 @@ migrateresources
 
         $businessCaseUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$AssessmentProjectName/businesscases/${businessCaseName}?api-version=$businessCaseApiVersion"
         
-        Write-LogToBlob "IaaSOnly Business Case URI: $businessCaseUri"
-        Write-LogToBlob "IaaSOnly Business Case Body: $businessCaseBody"
-        
-        $response = Invoke-RestMethod -Uri $businessCaseUri `
+        Invoke-RestMethodWithRetry -Uri $businessCaseUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
-            -Body $businessCaseBody
+            -Body $businessCaseBody | Out-Null
 
         Write-LogToBlob "IaaSOnly Business Case created successfully"
-        Write-LogToBlob "IaaSOnly Business Case response: $($response | ConvertTo-Json -Depth 10)"
         
         return $businessCaseName
     }
@@ -1230,17 +1264,12 @@ function New-GlobalAssessment {
 
         $heteroAssessmentUri = "https://management.azure.com/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.Migrate/assessmentprojects/$AssessmentProjectName/heterogeneousAssessments/${heteroAssessmentName}?api-version=$heteroApiVersion"
         
-        Write-LogToBlob "Global Assessment URI: $heteroAssessmentUri"
-        Write-LogToBlob "Global Assessment Body: $heteroAssessmentBody"
-        
-        $response = Invoke-RestMethod -Uri $heteroAssessmentUri `
+        Invoke-RestMethodWithRetry -Uri $heteroAssessmentUri `
             -Method PUT `
             -Headers $Headers `
-            -ContentType 'application/json' `
-            -Body $heteroAssessmentBody
+            -Body $heteroAssessmentBody | Out-Null
 
         Write-LogToBlob "Global Assessment created successfully"
-        Write-LogToBlob "Global Assessment response: $($response | ConvertTo-Json -Depth 10)"
         
         return $heteroAssessmentName
     }
