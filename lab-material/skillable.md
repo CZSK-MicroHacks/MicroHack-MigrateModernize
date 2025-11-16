@@ -46,8 +46,6 @@ Each exercise is independent. If you get stuck in any of them, you can proceed t
 ## Overview
 Migration preparation is the foundation of any successful cloud migration. This exercise teaches you how to set up Azure Migrate to discover and assess your on-premises environment. You'll work with a simulated datacenter containing multiple VMs running different applications.
 
-**Why this matters:** Proper discovery and data collection are essential for accurate migration planning. Without good data, you cannot make informed decisions about what to migrate, when to migrate it, and how much it will cost.
-
 Click Next to start the exercise
 
 ===
@@ -316,8 +314,6 @@ Since we don't have all this time now, we have prepared another Azure Migrate pr
 ## Overview
 After the Azure Migrate appliance has been running and collecting data from your on-premises environment, you need to analyze this data to make informed migration decisions. This exercise teaches you how to prepare clean data, build business cases, and perform technical assessments.
 
-**Why this matters:** Clean data and proper analysis are critical for successful migration planning. Business cases help justify investments, while assessments ensure technical feasibility.
-
 1. [ ] Go to the Azure Portal and open the already prepared project: ++lab@lab.LabInstance.Id-azm++
 
 ![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/0095.png)
@@ -339,12 +335,14 @@ You will find several issues, such as:
 
 In a real-world scenario, you should resolve all issues to improve data quality. For this exercise, we will proceed with the available data.
 
+> [+Hint] Screenshot
+>
+>![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01005.png)
+
 ===
 # Create Applications
 
 Once your workload data is clean, group VMs into applications to identify what should be migrated together. This helps ensure application dependencies are maintained during migration.
-
-**Why this step matters:** Migrating related components together reduces risk and ensures applications continue to function properly in Azure.
 
 Let's create an application definition for Contoso University:
 
@@ -355,7 +353,7 @@ Let's create an application definition for Contoso University:
 5. [ ] In **Type**, select **Custom** (meaning we have access to the source code)
 6. [ ] In **Workloads**, find all the +++ContosoUniversity+++ workloads using the filter and select them all
     
-    > [+Hint] T
+    > [+Hint] Screenshot
     >
 	>![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01002.png)
 7. [ ] In **Properties**, select any criticality and complexity, then create the application
@@ -364,11 +362,7 @@ Let's create an application definition for Contoso University:
 ===
 # Build a Business Case
 
-**Goal:** Create a financial justification for your migration project
-
-A business case helps you understand where Azure brings the most value by estimating Total Cost of Ownership (TCO), potential savings, and sustainability impact for your applications and workloads.
-
-
+A business case helps you understand where Azure brings the most value by estimating Total Cost of Ownership (TCO), potential savings, and sustainability impact for your applications and workloads. 
 
 1. [ ] In the **Decide and plan** tab, open **Business cases**
    You will notice there are business cases already created - we'll ignore those for now
@@ -384,18 +378,20 @@ You can create business cases for all workloads or scope them to specific applic
 8. [ ] Add a 15% Azure discount (simulate enterprise agreements)
 9. [ ] Click **Build business case**
 
-You can create several business cases for different scenarios, like rehosting vs refactoring, or considering different applications.
-
 Building the business case takes several minutes. While we wait, let's examine a pre-built business case.
 
 ===
 
 # Analyze an Existing Business Case
 
-Let's examine a completed business case focused on modernization for the entire datacenter to understand how to interpret business case results and identify savings opportunities
+You can create several business cases for different scenarios, like rehosting vs refactoring, or considering different applications.
+
+Building the business case takes several minutes. While we wait, let's examine a pre-built business case focused on modernization for the entire datacenter to understand how to interpret business case results and identify savings opportunities
 
 1. [ ] Expand **Decide and Plan** and open **Business cases** in the left panel
 2. [ ] Open the **businesscase-for-paas** business case
+
+===
 
 ## Key Metrics Analysis
 
@@ -414,8 +410,10 @@ The overview shows several important metrics:
 Let's explore where these savings come from:
 
 1. [ ] Expand **Business Case Reports** and open **Current on-premises vs future**
-2. [ ] Scroll to the table below and review the **Compute and licensing** cost savings
+2. [ ] Scroll to the table below and review the different lines, like **Compute and licensing** cost savings
 3. [ ] Continue scrolling to see the estimated Carbon Dioxide emissions reduction
+
+===
 
 ## Migration Strategies
 
@@ -426,7 +424,14 @@ This report maps your workloads to Gartner's 6R migration strategies:
 - **Replatform:** Move to managed services (e.g., Azure SQL Managed Instance)
 - **Refactor:** Modernize to PaaS services (e.g., Azure App Service)
 
-The page shows licensing costs and Azure Hybrid Benefit opportunities.
+In this case, the report propose to us that after the migration some workloads will be rehosted and some will be replatformed.
+
+Can you find
+1. [ ] total cost of running all applications on Azure?
+2. [ ] Total cost of applications that will be hosted on VMs?
+3. [ ] Total cost of SQL databases running on VMs?
+
+===
 
 ## Azure Cost Assumptions
 
@@ -499,10 +504,14 @@ You now have the foundation for informed migration decisions. In the following e
 
 ===
 
-### 
-1. [ ] Go to the Azure Portal, and open the already prepared project: ++lab@lab.LabInstance.Id-azm++
-
-![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/0095.png)
+TODO questions
+How many Linux VMs are power off? Answer 3 + 01001.png
+How many Windows 2016 servers have we discovered? Answer 5 + 01004.png
+-
+How much are we going to expend in Azure VMs for hosting applications? 57.2K
+How much are we going to expend in PaaS services to host applications? 41.7K
+What will be the total cost for the applications that have been rehosted? 70.9K
+-
 
 
 ===
