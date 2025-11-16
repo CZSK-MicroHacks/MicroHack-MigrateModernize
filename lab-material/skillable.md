@@ -449,10 +449,22 @@ You can find more information [in the official documentation](https://learn.micr
 
 ===
 # Technical Assessment
+**Goals:** Evaluate technical readiness and migration complexity for your workloads
 
 While business cases focus on financial aspects, **Assessments** help you choose the right migration approach and Azure services. <br>
 They evaluate technical readiness for migration. <br>
 Assessment focus on analyze workloads for migration strategy, Azure readiness and right-sized targets.
+
+When you create a business plan, an Assessment is created automatically for you.
+
+1. [ ] Expand **Decide and plan** and Open **Assessments** page
+
+
+> [+Hint] Screenshot
+>
+> ![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01007.png)
+
+===
 
 ## Assessment Components
 
@@ -464,6 +476,8 @@ Azure Migrate assessments evaluate your workloads for:
 - **Azure resource cost:** Total cost for hosting workloads on Azure
 - **Migration tools:** Recommended tools for each migration type
 
+===
+
 ## Review an Existing Assessment
 
 1. [ ] Expand **Decide and plan** and open the **Assessments** page
@@ -471,17 +485,75 @@ Azure Migrate assessments evaluate your workloads for:
    (This assessment is automatically created when you build a business case)
 3. [ ] Review the **Recommended path**: Notice it shows "PaaS preferred"
 4. [ ] Explore the different tabs to see:
-   - **Azure readiness** for each server
-   - **Cost details** broken down by service type
-   - **Monthly cost estimates** for running workloads in Azure
-
-## Key Assessment Insights
-
-The assessment provides detailed technical analysis that complements the business case financial analysis. Together, they give you a complete picture for migration planning.
-
-> **Note:** You can create specific assessments for individual applications or server groups to get more detailed technical recommendations. 
+5. [ ] Check the monthly cost for this path
+6. [ ] Check how many workloads (VMs) are going to be Replatformed and how many Rehosted
+7. [ ] Chek the split cost on Storage, Security and Copute
 
 ===
+
+## Review an Existing Assessment
+
+Now we understand what we should do. Let's dig into individual applications to understand what is the reommended actions
+
+1. [] Click in **View Details** or select the **PaaS preferred** tab
+	
+    > [+Hint] Screenshot
+	>
+	> ![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01008.png)
+
+There are three targets. 
+1. Web apps to App Service
+1. SQL Instances to Azure VMs
+1. Serviers to azure VM
+
+Open the first one, **Web apps to App service code**
+
+===
+
+## WebApps to App Service
+
+There are 22 applications, of which 12 are ready to be migrated. Ten Appliations require some work.
+Let's dig into these tasks
+
+Can you spot
+1. [] Total Number of applications?
+2. [ ] Applications that are Ready with conditions?
+3. [ ] Recommended App Service Plan?
+4. [ ] Top migration issues we will face?
+
+> **Note:** You can create specific assessments for individual applications or server groups to get focus detailed technical recommendations. 
+
+===
+
+## Contoso University
+
+From the list of applications, select now ContosoUniversity
+
+If the appliance run long enough. You will find in here information regarding the application
+
+Can you spot
+1. [] Appliation URL
+1. [] Migration warnings (Readiness tab)
+
+This application, even when it seems that it require some work. Its a nice candidate to start our migration
+Let's look for some more details before we start the migration
+
+===
+
+## Contoso University
+
+1. [ ] Expand the **Explore applications** tab
+2. [ ] Open Contoso University application we created some minutes ago
+
+Can you spot:
+1. [ ] How many servers and databases copose the application?
+2. [ ] The operative systems state?
+
+Click in the Workloads to take a look at the involved servers
+  
+
+===
+
 # Exercise 2 Summary
 
 **What you accomplished:**
