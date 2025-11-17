@@ -104,7 +104,7 @@ In the Windows menu, open the `Hyper-V Manager` to discover the inner VMs.
 3. [ ] If you are required to sign in, use the following credentials<br>
 	username: +++adminuser+++<br>
     password: +++demo!pass123+++
-4. [ ] Open Edge inside the Hyper-V VMand verify that an application is running by opening +++http://172.100.2.110+++<br>
+4. [ ] Open Edge inside the Hyper-V VM and verify that an application is running by opening +++http://172.100.2.110+++<br>
 	Notice that the first time you run it. It will take some time to load
 
 > [+Hint] Open an application in Hyper-V Guest VM
@@ -582,7 +582,7 @@ Can you spot:
 ### Software Inventory
 Finally, let's check what other software is running on the servers, to make sure we are not forgetting any important component
 
-9. [ ] Go back to the Worloads, and open **win-ContosoUniversity-backend**
+9. [ ] Go back to the Workloads, and open **win-ContosoUniversity-backend**
 
 
 > [+Hint] Screenshot
@@ -638,7 +638,7 @@ Let's see if you can find the answers to these questions:
 
 > [+Hint] Need some help?
 > 
-> Navigate the the business case `businesscase-for-paas`
+> Navigate to the business case `businesscase-for-paas`
 > Open the Overview page
 > Look at the Potential cost savings card and find the savings
 
@@ -754,7 +754,7 @@ The first step is to do a code assessment, followed by a complete upgrade. For t
 
 !IMAGE[Screenshot 2025-11-16 at 17.34.45.png](instructions310257/Screenshot 2025-11-16 at 17.34.45.png)
 
-3. This task will take a while. In case it asks you to allow operations, allow them by answering in the chat window. If it gets stuck, encourage it with nice words to continue. If you have the feeling it gets stuck like it stops working completely, you can a) call your proctors and we help you decide what to do or b) close VS completely and re-open it, but then we need to continue prompting manually.
+3. This task will take a while. In case it asks you to allow operations, allow them by answering in the chat window. If it gets stuck, ask it to continue. If you think it's stuck (it stops working completely), you can a) call your proctors and we help you decide what to do or b) close VS completely and re-open it, but then we need to continue prompting manually.
 
 4. You know when it's done *dotnet-upgrade-report.md* will show up.
 
@@ -772,7 +772,7 @@ Next we want to deploy our modernized application to Azure App Service.
 
 !IMAGE[Screenshot 2025-11-16 at 17.34.45.png](instructions310257/Screenshot 2025-11-16 at 17.34.45.png)
 
-3. While GitHub Copilot is working, let's have a lookt at the assessment report it generated. On the upper right you can either import or export the report. But you can also kick of specific tasks to resolve **Cloud Readiness Issues** here. Exactly what we want to do, because we want to deploy to Azure.
+3. While GitHub Copilot is working, let's have a look at the assessment report it generated. On the upper right you can either import or export the report. But you can also kick of specific tasks to resolve **Cloud Readiness Issues** here. Exactly what we want to do, because we want to deploy to Azure.
 
 !IMAGE[0080.png](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/0080.png)
 
