@@ -1221,7 +1221,7 @@ The tool includes intelligent error detection capabilities that automatically id
 
 ===
 
-## Run the App ##
+### Run the App ###
 
 After you have completed the modernization task, run the application to ensure the task was successful:
 
@@ -1236,7 +1236,7 @@ After you have completed the modernization task, run the application to ensure t
 
 ===
 
-## Other Tasks ##
+### Other Tasks ###
 
 Continue modernization your app by selecting another task and completing the modernization steps.
 
