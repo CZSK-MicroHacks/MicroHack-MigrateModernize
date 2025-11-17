@@ -678,6 +678,14 @@ You now have the foundation for informed migration decisions. In the following e
 
 # Excercise 3 - .NET App modernization
 
+**Goals:**
+- Clone and set up the Contoso University .NET application
+- Use GitHub Copilot App Modernization to assess the application for cloud readiness
+- Upgrade the application from .NET Framework to .NET 9
+- Migrate authentication from Windows AD to Microsoft Entra ID
+- Resolve cloud readiness issues and deploy to Azure App Service
+
+## Overview
 Before we begin, make sure you are logged into GitHub: [https://github.com/enterprises/skillable-events](https://github.com/enterprises/skillable-events "https://github.com/enterprises/skillable-events")
 
 > [!Knowledge]
@@ -774,7 +782,45 @@ Next we want to deploy our modernized application to Azure App Service.
 
 ===
 
+# Exercise 3 Summary
+
+**What you accomplished:**
+
+1. ✅ **Repository Setup:** Cloned the Contoso University repository and validated the .NET application builds successfully
+2. ✅ **Cloud Assessment:** Used GitHub Copilot App Modernization to perform comprehensive code analysis for Azure readiness
+3. ✅ **Framework Upgrade:** Successfully upgraded the application from legacy .NET Framework to modern .NET 9
+4. ✅ **Authentication Modernization:** Migrated from Windows Active Directory to Microsoft Entra ID for cloud-native identity management
+5. ✅ **Cloud Readiness:** Resolved all mandatory cloud readiness issues identified in the upgrade report
+6. ✅ **Azure Deployment:** Deployed the fully modernized application to Azure App Service
+
+**Key Takeaways:**
+- GitHub Copilot App Modernization automates complex upgrade tasks that would take days manually
+- The tool generates detailed assessment reports prioritizing issues by urgency (Mandatory, Potential, Optional)
+- Authentication modernization is critical for cloud security and integration with Azure services
+- Automated validation ensures the upgraded application maintains functionality throughout the process
+- The modernization workflow preserves your original code in branches, enabling safe rollback if needed
+
+**Next Steps:**
+You've successfully modernized a .NET application for Azure. In Exercise 4, you'll apply similar techniques to modernize a Java application, learning how GitHub Copilot handles different technology stacks.
+
+===
+
 # Exercise 4 - Java App modernization
+
+**Goals:**
+- Set up the Asset Manager Java application with local development environment
+- Use GitHub Copilot App Modernization to perform AppCAT assessment for Azure readiness
+- Review and prioritize cloud readiness issues and Java upgrade opportunities
+- Execute guided migration tasks to migrate from AWS S3 to Azure Blob Storage
+- Validate migration success through automated security and functional testing
+- Test the modernized application locally
+
+## Overview
+In this exercise, you'll modernize a Java Spring Boot application using GitHub Copilot App Modernization in VS Code. You'll learn how to assess a Java application for cloud readiness, identify migration issues, and automatically remediate them using AI-powered tools. The focus will be on migrating cloud dependencies from AWS to Azure while maintaining application functionality.
+
+**What You'll Do:** Use GitHub Copilot app modernization to assess, remediate, and modernize the Java application in preparation to migrate the workload to App Service
+
+**What You'll Learn:** How GitHub Copilot app modernization works, demonstration of modernizing elements of legacy applications, and the modernization workflow
 
 <!-- Install Java 8: [Download Java 8](https://adoptium.net/download?link=https%3A%2F%2Fgithub.com%2Fadoptium%2Ftemurin8-binaries%2Freleases%2Fdownload%2Fjdk8u472-b08%2FOpenJDK8U-jdk_x64_windows_hotspot_8u472b08.msi&vendor=Adoptium)
 
@@ -808,15 +854,9 @@ Make sure you have selected Sonnet 4.5
 
 Click in Upgrade Java Runtime & Frameworks
 
-=== --> 
+=== -->
 
-## Application Modernization
-
-**What You'll Do:** Use GitHub Copilot app modernization to assess, remediate, and modernize the Java application in preparation to migrate the workload to App Service
-
-**What You'll Learn:** How GitHub Copilot app modernization works, demonstration of modernizing elements of legacy applications, and the modernization workflow
-
----
+===
 
 # Preparation
 
@@ -1151,38 +1191,85 @@ Continue modernization your app by selecting another task and completing the mod
 
 !IMAGE[tresdc8l.jpg](instructions310257/tresdc8l.jpg)
 
-=== 
+===
+
+# Exercise 4 Summary
+
+**What you accomplished:**
+
+1. ✅ **Environment Setup:** Configured Java development environment with Docker, Maven, and the Asset Manager application
+2. ✅ **Local Validation:** Successfully ran the Asset Manager application locally to establish a working baseline
+3. ✅ **AppCAT Assessment:** Performed comprehensive cloud readiness analysis identifying 9 issues and 4 Java upgrade opportunities
+4. ✅ **Issue Prioritization:** Learned to distinguish between Mandatory, Potential, and Optional migration issues
+5. ✅ **Guided Migration:** Executed automated migration from AWS S3 to Azure Blob Storage using AI-powered code refactoring
+6. ✅ **Dependency Updates:** Updated Maven and Gradle configurations with Azure SDK dependencies
+7. ✅ **Automated Validation:** Validated migration through CVE scanning, build verification, consistency checks, and test execution
+8. ✅ **Post-Migration Testing:** Verified the modernized application runs successfully with Azure Blob Storage
+
+**Key Takeaways:**
+- AppCAT provides targeted assessment rules for different Azure services (AKS, App Service, Container Apps)
+- GitHub Copilot can automatically resolve over 78% of identified migration issues
+- Guided migration tasks offer structured, step-by-step remediation for common patterns
+- The tool tracks all changes in `plan.md` and `progress.md` files for complete transparency
+- Branch-based workflow enables safe rollback if needed
+- Automated validation catches security vulnerabilities and build issues early
+- Platform migrations (AWS to Azure) require both code and dependency changes
+
+**Next Steps:**
+You've now completed the full migration lifecycle from assessment to deployment. You've learned to use both Azure Migrate for infrastructure planning and GitHub Copilot for application modernization across .NET and Java stacks. These skills prepare you to tackle real-world migration projects with confidence.
+
+**Additional Modernization Opportunities:**
+- Continue with other migration tasks identified in the assessment report
+- Explore containerization options for deploying to AKS or Azure Container Apps
+- Implement additional Azure services like Azure Service Bus (replacing RabbitMQ)
+- Apply Java runtime upgrades using the identified opportunities
+- Configure managed identities for passwordless authentication
+
+===
 
 ## Workshop Recap & What's Next
 
-**Congratulations!** You've successfully completed a comprehensive application modernization journey, transforming a legacy application into a cloud-ready, secure, and scalable solution on Azure.
+**Congratulations!** You've successfully completed a comprehensive migration and modernization journey, transforming legacy applications into cloud-ready, secure, and scalable solutions on Azure.
 
 ### What You Accomplished
 
-**Local Environment Setup**
+**Exercise 1: Migration Preparation**
 
-- Set up Spring Boot PetClinic with PostgreSQL in Docker
-- Validated local application functionality and database connectivity
+- Explored a simulated datacenter environment with nested Hyper-V VMs
+- Created and configured an Azure Migrate project for discovery
+- Downloaded, installed, and configured the Azure Migrate appliance
+- Connected the appliance to on-premises infrastructure with proper credentials
+- Initiated continuous discovery for performance and dependency data collection
 
-**Application Modernization**
+**Exercise 2: Migration Analysis & Business Case**
 
-- Used GitHub Copilot App Modernization to assess code for cloud readiness
-- Migrated from basic PostgreSQL authentication to Azure PostgreSQL Flexible Server
-- Implemented Microsoft Entra ID authentication with managed identity
-- Applied automated code transformations for cloud-native patterns
+- Reviewed and cleaned migration data using Azure Migrate's Action Center
+- Grouped related VMs into logical applications (ContosoUniversity)
+- Built business cases showing financial justification with cost savings and ROI analysis
+- Analyzed technical assessments for cloud readiness and migration strategies
+- Evaluated workload readiness across VMs, databases, and web applications
+- Navigated migration data to identify issues, costs, and modernization opportunities
 
-**Containerization**
+**Exercise 3: .NET Application Modernization**
 
-- Generated Docker containers using AI-powered tools
-- Created optimized Kubernetes manifests with health checks and security best practices
-- Built and pushed container images to Azure Container Registry
+- Cloned and configured the Contoso University .NET application repository
+- Used GitHub Copilot App Modernization extension in Visual Studio
+- Performed comprehensive code assessment for cloud readiness
+- Upgraded application from legacy .NET Framework to .NET 9
+- Migrated from Windows AD to Microsoft Entra ID authentication
+- Resolved cloud readiness issues identified in the upgrade report
+- Deployed the modernized application to Azure App Service
 
-**Cloud Deployment**
+**Exercise 4: Java Application Modernization**
 
-- Deployed to AKS Automatic with enterprise-grade security
-- Configured passwordless authentication using workload identity
-- Integrated Azure Service Connector for seamless database connectivity
-- Validated production deployment with secure authentication
+- Set up local Java development environment with Docker and Maven
+- Ran the Asset Manager application locally to validate functionality
+- Used GitHub Copilot App Modernization extension in VS Code
+- Performed AppCAT assessment for Azure migration readiness (9 cloud readiness issues, 4 Java upgrade opportunities)
+- Executed guided migration tasks to modernize the application
+- Migrated from AWS S3 to Azure Blob Storage with automated code refactoring
+- Validated migration success through automated CVE, build, consistency, and test validation
+- Tested the modernized application locally
 
 ---
 
@@ -1190,16 +1277,20 @@ Continue modernization your app by selecting another task and completing the mod
 
 **Continue Your Azure Journey:**
 
-- [AKS Automatic Documentation](https://learn.microsoft.com/en-us/azure/aks/intro-aks-automatic) - Deep dive into automatic cluster management
+- [Azure Migrate Documentation](https://learn.microsoft.com/azure/migrate/) - Deep dive into migration tools and strategies
 - [Azure Well-Architected Framework](https://learn.microsoft.com/azure/well-architected/) - Learn enterprise architecture best practices
-- [AKS Engineering Blog](https://blog.aks.azure.com/) - Stay updated with latest AKS features and patterns
+- [GitHub Copilot for Azure](https://learn.microsoft.com/azure/developer/github-copilot/) - Explore AI-powered development tools
 
 **Hands-On Labs:**
 
-- [AKS Labs](https://azure-samples.github.io/aks-labs/) - Interactive learning experiences
+- [Azure Migration Center](https://azure.microsoft.com/migration/) - Additional migration resources and tools
 - [Azure Architecture Center](https://learn.microsoft.com/azure/architecture/) - Reference architectures and patterns
-- [Microsoft Learn - AKS Learning Path](https://learn.microsoft.com/training/paths/intro-to-kubernetes-on-azure/) - Structured learning modules
+- [Microsoft Learn - Azure Migration Path](https://learn.microsoft.com/training/paths/migrate-modernize-innovate-azure/) - Structured learning modules
 
 ### Key Takeaways
 
-This workshop demonstrated how AI-powered tools can dramatically accelerate application modernization while maintaining code quality and security standards. The combination of GitHub Copilot App Modernization and Azure's managed services enables teams to focus on business value rather than infrastructure complexity.
+This workshop demonstrated the complete migration lifecycle from discovery to deployment:
+- **Assessment First**: Azure Migrate provides comprehensive discovery and financial justification before migration
+- **AI-Powered Modernization**: GitHub Copilot dramatically accelerates code modernization while maintaining quality
+- **Platform Migration**: Successfully migrated dependencies (S3 to Blob Storage, Windows AD to Entra ID) alongside application code
+- **Validation at Every Step**: Automated testing ensures functionality is preserved throughout modernization
