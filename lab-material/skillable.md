@@ -472,6 +472,7 @@ This shows Gartner's 6R migration approaches:
 - **Refactor:** Modernize to PaaS (App Service)
 
 The report recommends a mix of rehosting and replatforming for your workloads.
+Some applications will be replatformed, some others can only be rehosted. The total cost is the sum of all values
 
 Can you spot:
 1. [ ] Total cost for all Azure applications?
@@ -594,58 +595,64 @@ Can you spot:
 This analysis helps you understand migration complexity and dependencies.
 ===
 
-# Exercise 2 Quiz
+# Exercise 2 Quiz. Question 1
 
+I hope now it is clear how to navigate data, where to find workloads, financial or technical information.
 
-TODO questions
-How many Linux VMs are power off? Answer 3 + 01001.png
-How many Windows 2016 servers have we discovered? Answer 5 + 01004.png
--
-How much are we going to expend in Azure VMs for hosting applications? 57.2K
-How much are we going to expend in PaaS services to host applications? 41.7K
-What will be the total cost for the applications that have been rehosted? 70.9K
+Let's see if you can find the answers to these questions:
 
-question in progress
-
-@lab.Activity(Question1)
-
-question in progress
-
-@lab.Activity(Question2)
-
-question in progress
-
-@lab.Activity(Question3)
+@lab.Activity(PowerOffLinuxVms)
 
 > [+Hint] Need some help?
 > 
-> Navigate the the business case `buizzcaseevd`
+> ![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01001.png)
+
+===
+
+# Exercise 2 Quiz. Question 2
+
+@lab.Activity(CountWin2016)
+
+
+> [+Hint] Need some help?
+> 
+> ![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01004.png)
+
+===
+
+# Exercise 2 Quiz. Question 3
+
+@lab.Activity(CostVMsForApps)
+
+> [+Hint] Need some help?
+> 
+> ![Screenshot](https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-material/media/01011.png)
+
+===
+
+# Exercise 2 Quiz. Question 4
+
+@lab.Activity(CostSaving)
+
+> [+Hint] Need some help?
+> 
+> Navigate the the business case `businesscase-for-paas`
 > Open the Overview page
 > Look at the Potential cost savings card and find the savings
 
-question in progress
+===
 
-@lab.Activity(Question4)
+# Exercise 2 Quiz. Question 5
+
+@lab.Activity(SecuritySaving)
 
 > [+Hint] Need some help?
 > 
-> Navigate the the business case `buizzcaseevd`
+> Navigate the the business case `businesscase-for-paas`
 >
 > On the menu in the left, open `Business Case Reports` and navigate to `Current on-premises vs future`
 >
 > Look for Security row, and pay attention at the last column
-
-
-question in progress
-
-@lab.Activity(Question5)
-
-> [+Hint] Need some help?
-> 
-> Todo: Some help here
->
-> 
-
 
 ===
 
