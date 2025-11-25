@@ -4,8 +4,8 @@
 ##############   CONFIGURATIONS   ###################
 ######################################################
 
-$SkillableEnvironment = $true
-$EnvironmentName = "crgmig13" # Set your environment name here for non-Skillable environments
+$SkillableEnvironment = $false
+$EnvironmentName = "migrate" # Set your environment name here for non-Skillable environments
 $ScriptVersion = "16.0.0"
 
 ######################################################
