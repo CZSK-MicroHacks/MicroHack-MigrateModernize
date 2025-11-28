@@ -387,6 +387,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 5. Install GitHub Copilot App Modernization extension if not present
 
 **Validate Application Locally:**
+
 6. Open Terminal in VS Code (View → Terminal)
 7. Run `scripts\startapp.cmd`
 8. Wait for Docker containers (RabbitMQ, Postgres) to start
@@ -395,6 +396,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 11. Stop the application by closing console windows
 
 **Perform AppCAT Assessment:**
+
 12. Open GitHub Copilot App Modernization extension in the Activity bar
 13. Ensure Claude Sonnet 4.5 is selected as the model
 14. Click "Migrate to Azure" to begin assessment
@@ -403,6 +405,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 17. Wait for assessment results (9 cloud readiness issues, 4 Java upgrade opportunities)
 
 **Analyze Assessment Results:**
+
 18. Review the assessment summary in GitHub Copilot chat
 19. Examine issue prioritization:
     - Mandatory (Purple) - Critical blocking issues
@@ -412,6 +415,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 21. Focus on the AWS S3 to Azure Blob Storage migration finding
 
 **Execute Guided Migration:**
+
 22. Expand the "Migrate from AWS S3 to Azure Blob Storage" task
 23. Read the explanation of why this migration is important
 24. Click the "Run Task" button to start the migration
@@ -419,6 +423,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 26. Type "Continue" in the chat to begin code refactoring
 
 **Monitor Migration Progress:**
+
 27. Watch the GitHub Copilot chat for real-time status updates
 28. Check the `progress.md` file for detailed change logs
 29. Review file modifications as they occur:
@@ -428,6 +433,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 30. Allow any prompted operations during the migration
 
 **Validate Migration:**
+
 31. Wait for automated validation to complete:
     - CVE scanning for security vulnerabilities
     - Build validation
@@ -438,6 +444,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 34. Confirm all validation stages pass successfully
 
 **Test Modernized Application:**
+
 35. Open Terminal in VS Code
 36. Run `scripts\startapp.cmd` again
 37. Verify the application starts with Azure Blob Storage integration
@@ -445,6 +452,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 39. Confirm no errors related to storage operations
 
 **Optional: Continue Modernization:**
+
 40. Review other migration tasks in the assessment report
 41. Execute additional migrations as time permits
 42. Track progress through the `plan.md` and `progress.md` files
@@ -577,6 +585,9 @@ Thank you for investing the time and see you next time!
 ## Contributors
 
 * Carlos Garcia - [GitHub](https://github.com/crgarcia12) | [LinkedIn](https://www.linkedin.com/in/crlos-garcia/)
+* Julia Kordick - [GitHub](https://github.com/jkordick) | [LinkedIn](https://www.linkedin.com/in/julia-kordick/)
+* Mitul Shah - [GitHub](https://github.com/mitulashah) | [LinkedIn](https://www.linkedin.com/in/mitulashah/
+
 
 ---
 
