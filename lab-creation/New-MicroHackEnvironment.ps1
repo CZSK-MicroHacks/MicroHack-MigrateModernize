@@ -7,6 +7,12 @@
 $SkillableEnvironment = $false
 $EnvironmentName = "mig$(Get-Date -Format 'yyMMddHHmmss')" # Set your environment name here for non-Skillable environments
 $ScriptVersion = "16.0.0"
+$EnvironmentName = "" # Globally unique! Set your environment name here
+
+if($EnvironmentName -eq "" ) {
+    $EnvironmentName = "lab" + (Get-Date -Format "yyMMddHHmmss")
+}
+
 
 ######################################################
 ##############   INFRASTRUCTURE FUNCTIONS   #########
