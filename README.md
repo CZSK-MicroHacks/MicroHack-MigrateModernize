@@ -16,6 +16,15 @@ This MicroHack provides hands-on experience with the entire migration lifecycle 
 - Azure Blob Storage for cloud-native storage
 
 ## Environment creation
+
+Make sure you have Azure PowerShell installed and authenticated to your Azure subscription.
+```PowerShell
+Install-Module Az
+Connect-AzAccount
+```
+
+Once you are authenticated to Azure via PowerShell, run the following script to create the lab environment:
+
 ```Powershell
 # Download and execute the environment creation script directly from GitHub
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-creation/New-MicroHackEnvironment.ps1" -OutFile "$env:TEMP\New-MicroHackEnvironment.ps1"
@@ -586,17 +595,6 @@ This workshop demonstrated the complete migration lifecycle from discovery to de
 If you want to give feedback, please don't hesitate to open an issue on the repository or get in touch with one of us directly.
 
 Thank you for investing the time and see you next time!
-
----
-
-## Contributors
-
-Aydin Kajdic
-- Aydin Kajdic [GitHub](https://github.com/ ajdinkajdic) | [LinkedIn](https://www.linkedin.com/in/aydin-kajdic/)
-* Carlos Garcia - [GitHub](https://github.com/crgarcia12) | [LinkedIn](https://www.linkedin.com/in/crlos-garcia/)
-* Julia Kordick - [GitHub](https://github.com/jkordick) | [LinkedIn](https://www.linkedin.com/in/julia-kordick/)
-* Mitul Shah - [GitHub](https://github.com/mitulashah) | [LinkedIn](https://www.linkedin.com/in/mitulashah/
-
 
 ---
 
