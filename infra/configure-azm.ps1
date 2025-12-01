@@ -172,6 +172,7 @@ function New-AzureEnvironment {
     try {
         Write-LogToBlob "Environment location: $Location"
         
+        # NOTE: Using v6 of the template intentionally. v7 is not used due to compatibility/stability issues (see PR discussion or issue tracker for details).
         $templateFile = '.\templates\lab197959-template2 (v6).json'
         
         Write-LogToBlob "Creating resource group: $ResourceGroupName"
