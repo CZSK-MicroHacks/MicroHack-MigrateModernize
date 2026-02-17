@@ -180,7 +180,7 @@ function New-AzureEnvironment {
             Write-LogToBlob "Local ARM template found: $templateFilePath"
         } else {
             Write-LogToBlob "Local ARM template not found. Downloading from GitHub..." "WARN"
-            $remoteTemplateUrl = "https://raw.githubusercontent.com/crgarcia12/migrate-modernize-lab/refs/heads/main/lab-creation/templates/$templateFileName"
+            $remoteTemplateUrl = "https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-creation/templates/$templateFileName"
             $templateFilePath = Join-Path $env:TEMP $templateFileName
             
             Write-LogToBlob "Downloading template from: $remoteTemplateUrl"
@@ -502,7 +502,7 @@ function Get-DiscoveryArtifacts {
     Write-LogToBlob "Downloading discovery artifacts"
     
     try {
-        $remoteZipFilePath = "https://github.com/crgarcia12/migrate-modernize-lab/raw/refs/heads/main/lab-creation/Azure-Migrate-Discovery.zip"
+        $remoteZipFilePath = "https://github.com//CZSK-MicroHacks/MicroHack-MigrateModernize/raw/refs/heads/main/lab-creation/Azure-Migrate-Discovery.zip"
         $localZipFilePath = Join-Path (Get-Location) "importArtifacts.zip"
         
         Write-LogToBlob "Downloading artifacts from: $remoteZipFilePath"
