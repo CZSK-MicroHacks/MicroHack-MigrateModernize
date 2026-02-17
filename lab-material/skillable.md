@@ -67,7 +67,7 @@ The lab simulates a datacenter by having a VM hosting server with several VMs in
 > [+Hint] Trouble finding the Resources tab?
 >
 > Navigate to the top right corner of this screen where you can always find the credentials and important information
-> ![text to display](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0010.png)
+> ![text to display](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0010.png)
 
 1. [ ] Open the list of resource groups. You will find one called `on-prem`
 2. [ ] Explore the resource group. Find a VM called `lab@lab.LabInstance.Id-vm`
@@ -93,13 +93,13 @@ In the Windows menu, open the `Hyper-V Manager` to discover the inner VMs.
 >
 > Open the **Server Manager** from the Windows menu. Select **Hyper-V**, right click in your server and click in **Hyper-V Manager**
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
 
 1. [ ] In **Hyper-V Manager**, select the inner VM **WEB-2025-100**. Right click ->  **Connect**
 
 > [+Hint] Connecting to a Hyper-V VM from Hyper-V host
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0012.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0012.png)
 
 3. [ ] If you are required to sign in, use the following credentials<br>
 	username: +++adminuser+++<br>
@@ -109,7 +109,7 @@ In the Windows menu, open the `Hyper-V Manager` to discover the inner VMs.
 
 > [+Hint] Open an application in Hyper-V Guest VM
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0013.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0013.png)
 
 We will now create another VM and install the Azure Migrate Appliance
 
@@ -138,7 +138,7 @@ In the next steps you will download the appliance image that will run inside you
 
     > [+Hint] Screenshot
     >
-    > ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0090.png)
+    > ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0090.png)
 
 ===
 ### Download the Appliance
@@ -147,7 +147,7 @@ In the Discover page
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0091.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0091.png)
 
 1. [ ] Select **Yes, with Hyper-V** in the dropdown
 1. [ ] Enter a name for the appliance. For example +++lab-appliance+++ and click **Generate key**
@@ -172,7 +172,7 @@ In the Discover page
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00914.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00914.png)
 
 ===
 
@@ -182,12 +182,12 @@ In the Discover page
     >
     > Open the **Server Manager** from the Windows menu. Select **Hyper-V**, right click in your server and click in **Hyper-V Manager**
     >
-    > ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
+    > ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
 
 1. [ ] Select **New** -> **Virtual Machine**
     > [+Hint] Create virtual machine
     >
-	> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0092.png)
+	> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0092.png)
 
 1. [ ] Click **Next** and enter a name. For example, +++AZMAppliance+++
 1. [ ] Click **Store the virtual machine in a different location** and specify +++F:\Hyper-V\Virtual Machines\appliance+++
@@ -199,7 +199,7 @@ In the Discover page
 
     > [+Hint] Create virtual machine
     >
-	> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00925.png)
+	> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00925.png)
 
 1. [ ] Click **Finish** and start the new VM by right-clicking and selecting **Start** 
 1. [ ] Double-click the VM to open a Remote Desktop connection to it. Initially, it will have a black screen for several minutes until it starts
@@ -219,7 +219,7 @@ We will now configure the appliance.
 
 	> [+Hint] Do you know how to send Ctrl+Alt+Del to a VM?
   	>
-  	> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0093.png)
+  	> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0093.png)
 
 ===
 
@@ -230,7 +230,7 @@ Once we log in, the machine will configure itself. Wait until the browser displa
 1. [ ] Agree to the terms of use and wait until it checks connectivity to Azure
 	> [+Hint] Screenshot
   	>
-  	> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00932.png)
+  	> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00932.png)
 
 1. [ ] Paste the key we obtained while creating the appliance in the Azure Portal and click **Verify**. 
 
@@ -243,14 +243,14 @@ Once we log in, the machine will configure itself. Wait until the browser displa
 	> [+Hint] If Copy & Paste does not work
   	>
   	> You can type the clipboard in the VM
-    > ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0094.png)
+    > ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0094.png)
 
 1. [ ] Login to Azure. If the **Login** button is grayed out, you need to **Verify** the key from the previous step again
 
     > [+Hint] Hint
     >
 	> Remember that the credentials are in the **Resources** tab.
-    > ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00945.png)
+    > ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00945.png)
 
 
 You have now connected the appliance to your Azure Migrate project. In the next steps we will provide credentials for the appliance to scan your Hyper-V environment
@@ -268,15 +268,15 @@ We will now provide Hyper-V host credentials. The appliance will use these crede
     
     password: +++demo!pass123+++
 
-    ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00946.png)
+    ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00946.png)
 
 
 1. [ ] Click **Add discovery source** and add the IP address of the Hyper-V host: +++172.100.2.1+++
 
     > [+Hint] Hint
     >
-	>![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00947.png)
-    >![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00948.png)
+	>![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00947.png)
+    >![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00948.png)
 
 1. [ ] We're almost there! Now we need to add credentials to analyze the software inside the VMs and the databases associated with the applications. Add credentials for Windows (Non-domain), Linux (Non-domain), SQL Server and PostgreSQL Server
 
@@ -286,8 +286,8 @@ We will now provide Hyper-V host credentials. The appliance will use these crede
 
     > [+Hint] Hint
     >
-	>![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00949.png)
-    >![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/009491.png)
+	>![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00949.png)
+    >![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/009491.png)
 
 
 1. [ ] Click **Start discovery**
@@ -302,19 +302,19 @@ The appliance will start collecting data and sending it to your Azure Migrate pr
 2. [ ] Search for **Azure Migrate** -> **All projects** and open your project. If you followed the naming guide, it should be called **migrate-prj**
 	> [+Hint] Screenshot
     >
-	>![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0095.png)
+	>![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0095.png)
 
 4. [ ] In the left panel, find **Manage** -> **Appliance** and open the appliance you configured.
 
 	> [+Hint] Screenshot
     >
-    >![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00951.png)
+    >![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00951.png)
 
 
 4. [ ] Validate that all services are running.
 	> [+Hint] Screenshot
     >
-    >![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00952.png)
+    >![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00952.png)
 
 ===
 
@@ -360,7 +360,7 @@ Your appliance has been collecting data from the on-premises environment. Now it
 
 1. [ ] Go to the Azure Portal and open the already prepared project: ++lab@lab.LabInstance.Id-azm++
 
-![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0095.png)
+![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0095.png)
 
 ===
 # Prepare your data
@@ -379,7 +379,7 @@ In production, fix these issues for better accuracy. For this lab, we'll work wi
 
 > [+Hint] Screenshot
 >
->![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01005.png)
+>![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01005.png)
 
 ===
 # Create Applications
@@ -398,7 +398,7 @@ Let's create an application for Contoso University:
 
 > [+Hint] Screenshot
 >
->![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01002.png)
+>![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01002.png)
 
 > [!Knowledge] Important: What is a **workload** in Azure Migrate?
 >
@@ -419,7 +419,7 @@ Let's create an application for Contoso University:
 
 You might receive an error message like the one bellow. This is only happening because we are using Preview features from the Azure Portal. Dismiss the error message and continue to the next section
 
-![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0014.png)
+![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0014.png)
 
 
 
@@ -510,7 +510,7 @@ When you create a business case, an assessment is automatically created.
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01007.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01007.png)
 
 ===
 # Review Assessment Details
@@ -528,7 +528,7 @@ Can you spot:
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01008.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01008.png)
 
 You will see three migration targets:
 - Web apps -> App Service
@@ -587,7 +587,7 @@ Finally, let's check what other software is running on the servers, to make sure
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01010.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01010.png)
 
 
 Can you spot:
@@ -607,7 +607,7 @@ Let's see if you can find the answers to these questions:
 
 > [+Hint] Need some help?
 > 
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01001.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01001.png)
 
 ===
 
@@ -618,7 +618,7 @@ Let's see if you can find the answers to these questions:
 
 > [+Hint] Need some help?
 > 
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01004.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01004.png)
 
 ===
 
@@ -628,7 +628,7 @@ Let's see if you can find the answers to these questions:
 
 > [+Hint] Need some help?
 > 
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01011.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01011.png)
 
 ===
 
@@ -717,10 +717,10 @@ With this extension you can:
 
 The first application we will migrate is *Contoso University*.
 
-Open the following [link to the repository](https://github.com//CZSK-MicroHacks/MicroHack-MigrateModernize "link to the repository").
+Open the following [link to the repository](https://github.com/CZSK-MicroHacks/MicroHack-MigrateModernize "link to the repository").
 
 In the repository view click on *<> Code* and in the tab *Local* choose *HTTPS* and *Copy URL to clipboard*.
-> The URL should look like this: *https://github.com//CZSK-MicroHacks/MicroHack-MigrateModernize.git*
+> The URL should look like this: *https://github.com/CZSK-MicroHacks/MicroHack-MigrateModernize.git*
 
  !IMAGE[Screenshot 2025-11-14 at 10.42.04.png](instructions310257/Screenshot 2025-11-14 at 10.42.04.png)
 
@@ -732,7 +732,7 @@ In the repository view click on *<> Code* and in the tab *Local* choose *HTTPS* 
 
 It is not required for the lab, but if you want you can run the app in IIS Express (Microsoft Edge).
 
-!IMAGE[0030.png](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0030.png)
+!IMAGE[0030.png](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0030.png)
 
 Edge will open and you will see the application running at `https://localhost:44300`
 
@@ -744,7 +744,7 @@ The first step is to do a code assessment, followed by a complete upgrade. For t
 
 1. Right click in the project and select *Modernize*
 
-!IMAGE[0040.png](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0040.png)
+!IMAGE[0040.png](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0040.png)
 
 > [!Hint] If GitHub Copilot asks you to sign in, click on *Already have an account? Sign in* and follow the steps to sign in to GitHub.
 
@@ -766,7 +766,7 @@ Next we want to deploy our modernized application to Azure App Service.
 
 1. Right click in the project, and select *Modernize* again
 
-!IMAGE[0040.png](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0040.png)
+!IMAGE[0040.png](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0040.png)
 
 2. In the GitHub Copilot Chat window, click on *Migrate to Azure*. It will paste this exact message in the chat window. Make sure you send it that GitHub Copilot can start working on the task.
 
@@ -774,7 +774,7 @@ Next we want to deploy our modernized application to Azure App Service.
 
 3. While GitHub Copilot is working, let's have a look at the assessment report it generated. On the upper right you can either import or export the report. But you can also kick of specific tasks to resolve **Cloud Readiness Issues** here. Exactly what we want to do, because we want to deploy to Azure.
 
-!IMAGE[0080.png](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0080.png)
+!IMAGE[0080.png](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0080.png)
 
 4. Begin with clicking on *Migrate from Windows AD to Microsoft Entra ID*. If GitHub Copilot does not pick up tasks automatically, you can always come back to the *dotnet-upgrade-report.md* file and click on the tasks you want to resolve.
 
@@ -867,7 +867,7 @@ Click in Upgrade Java Runtime & Frameworks
 
 > [+Hint] How to find your Azure credentials
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0010.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0010.png)
 
 4. [ ] Open **Docker Desktop** from the windows menu. Wait until the Docker desktop screen shows up
 5. [ ] Open the **Terminal**, and run 
@@ -875,7 +875,7 @@ Click in Upgrade Java Runtime & Frameworks
 ```
 mkdir C:\gitrepos\lab
 cd  C:\gitrepos\lab
-git clone https://github.com//CZSK-MicroHacks/MicroHack-MigrateModernize.git
+git clone https://github.com/CZSK-MicroHacks/MicroHack-MigrateModernize.git
 cd .\migrate-modernize-lab\src\AssetManager\
 code .
 exit
@@ -887,7 +887,7 @@ This script will clone a repo with the Java application, and open VS code on tha
 > [+Hint] How to login to GitHub from VSCode
 >
 > In visual studio, click on the copilot icon on the top, next to the search bar. Then click in Continue with GitHub. Follow the instructions in the browser
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02003.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02003.png)
 
 
 Next let's begin our modernization work. 
@@ -903,7 +903,7 @@ Let's first run the application.
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02002.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02002.png)
 
 1. [ ] In the terminal window, run ```scripts\startapp.cmd```
 
@@ -914,7 +914,7 @@ If you are asked to grant permissions for Docker, Java or other applications to 
 
 Once both console windows show messages that the apps are running, you should be able to open the browser and navigate to  +++http://localhost:8080+++
 
- ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02004.png)
+ ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02004.png)
 
 You can now close the application, by closing the console windows that were open.
 
@@ -926,7 +926,7 @@ You can now close the application, by closing the console windows that were open
 2. Ensure that Claude Sonnet 4.5 is selected as the model in the GitHub Copilot chat pane.
 3. Select  `GitHub Copilot app modernization` extension in the Activity bar on the left
 4. Navigate the Extension Interface and click **Migrate to Azure** to begin the modernization process.
-	!IMAGE[screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02001.png)
+	!IMAGE[screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02001.png)
 
 <!-- 1. Allow the GitHub Copilot app modernization to sign in to GitHub 
 	!IMAGE[ghcp-allow-signin.png](instructions310381/ghcp-allow-signin.png)
@@ -944,7 +944,7 @@ You can now close the application, by closing the console windows that were open
 	!IMAGE[appcat-install.png](instructions310381/appcat-install.png) -->
 
 > [!hint] You can follow the progress of the upgrade by looking at the Terminal in vscode
-!IMAGE[assessment-rules.png](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02005.png)
+!IMAGE[assessment-rules.png](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02005.png)
 
 <!-- Also note that you might be prompted to allow access to the language models provided by GitHub Copilot Chat. Click on **Allow**
 
@@ -1006,7 +1006,7 @@ Choose how deep AppCAT should inspect the project.
 
 After the assessment completes, you'll see a success message in the GitHub Copilot chat summarizing what was accomplished:
 
-!IMAGE[assessment report](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02006.png)
+!IMAGE[assessment report](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02006.png)
 
 The assessment analyzed the Asset Manager application for cloud migration readiness and identified the following:
 
@@ -1186,7 +1186,7 @@ After you have completed the modernization task, run the application to ensure t
 
 > [+Hint] Screenshot
 >
-> ![Screenshot](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02002.png)
+> ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/02002.png)
 
 1. [ ] In the terminal window, run ```scripts\startapp.cmd```
 

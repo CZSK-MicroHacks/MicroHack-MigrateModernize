@@ -30,7 +30,7 @@ Once you are authenticated to Azure via PowerShell, run the following script to 
 
 ```Powershell
 # Download and execute the environment creation script directly from GitHub
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-creation/New-MicroHackEnvironment.ps1" -OutFile "$env:TEMP\New-MicroHackEnvironment.ps1"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-creation/New-MicroHackEnvironment.ps1" -OutFile "$env:TEMP\New-MicroHackEnvironment.ps1"
 & "$env:TEMP\New-MicroHackEnvironment.ps1"
 ```
 
@@ -97,11 +97,11 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 3. Connect to the Hyper-V host VM (`lab@lab.LabInstance.Id-vm`)
 4. Explore the nested VMs running inside the host
 
-![Hyper-V Manager showing nested VMs](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
+![Hyper-V Manager showing nested VMs](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
 
 5. Verify that applications are running (e.g., http://172.100.2.110)
 
-![Application running in nested VM](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0013.png)
+![Application running in nested VM](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0013.png)
 
 **Create Azure Migrate Project:**  
 
@@ -109,18 +109,18 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 7. Name your project (e.g., `migrate-prj`)
 8. Select an appropriate region (e.g., Canada)
 
-![Azure Migrate Discovery page](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0090.png)
+![Azure Migrate Discovery page](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0090.png)
 
 **Deploy the Azure Migrate Appliance:**
 
 9. Generate a project key for the appliance
 10. Download the Azure Migrate appliance VHD file
 
-![Download appliance VHD](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0091.png)
+![Download appliance VHD](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0091.png)
 
 11. Extract the VHD inside your Hyper-V host (F: drive recommended)
 
-![Extract VHD to F drive](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00914.png)
+![Extract VHD to F drive](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00914.png)
 
 12. Create a new Hyper-V VM using the extracted VHD:
     - Name: `AZMAppliance`
@@ -128,9 +128,9 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
     - RAM: 16384 MB
     - Network: NestedSwitch
 
-![Create new VM in Hyper-V](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0092.png)
+![Create new VM in Hyper-V](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0092.png)
 
-![Select VHD file](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00925.png)
+![Select VHD file](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00925.png)
 
 13. Start the appliance VM
 
@@ -138,28 +138,28 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 
 14. Accept license terms and set appliance password: `Demo!pass123`
 
-![Send Ctrl+Alt+Del to appliance](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0093.png)
+![Send Ctrl+Alt+Del to appliance](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0093.png)
 
 15. Wait for Azure Migrate Appliance Configuration to load in browser
 
-![Appliance Configuration Manager](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00932.png)
+![Appliance Configuration Manager](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00932.png)
 
 16. Paste and verify your project key
 17. Login to Azure through the appliance interface
 
-![Login to Azure](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00945.png)
+![Login to Azure](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00945.png)
 
 18. Add Hyper-V host credentials (username: `adminuser`, password: `demo!pass123`)
 
-![Add credentials](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00946.png)
+![Add credentials](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00946.png)
 
 19. Add discovery source with Hyper-V host IP: `172.100.2.1`
 
-![Add discovery source](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00948.png)
+![Add discovery source](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00948.png)
 
 20. Add credentials for Windows, Linux, SQL Server, and PostgreSQL workloads
 
-![Add workload credentials](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/009491.png)
+![Add workload credentials](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/009491.png)
 
 21. Start the discovery process
 
@@ -170,11 +170,11 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 - ✅ Azure Migrate project has been created
 - ✅ Appliance is deployed and connected to Azure Migrate
 
-![Appliance in Azure Portal](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00951.png)
+![Appliance in Azure Portal](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00951.png)
 
 - ✅ All appliance services show as running in Azure Portal
 
-![Appliance services running](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00952.png)
+![Appliance services running](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00952.png)
 
 - ✅ Discovery process has started collecting data from your environment
 
@@ -198,11 +198,11 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 **Review Data Quality:**
 1. Navigate to your Azure Migrate project overview
 
-![Azure Migrate project overview](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0095.png)
+![Azure Migrate project overview](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0095.png)
 
 2. Open the Action Center to identify data quality issues
 
-![Action Center with data issues](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01005.png)
+![Action Center with data issues](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01005.png)
 
 3. Review common issues (powered-off VMs, connection failures, missing performance data)
 4. Understand the impact of data quality on assessment accuracy
@@ -215,7 +215,7 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 8. Link relevant workloads to the application
 9. Filter and select all ContosoUniversity-related workloads
 
-![Link workloads to application](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01002.png)
+![Link workloads to application](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01002.png)
 
 10. Set criticality and complexity ratings
 
@@ -241,11 +241,11 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 
 23. Navigate to Assessments section
 
-![Assessments overview](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01007.png)
+![Assessments overview](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01007.png)
 
 24. Open the "businesscase-businesscase-for-paas" assessment
 
-![Assessment details](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01008.png)
+![Assessment details](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01008.png)
 
 25. Review recommended migration paths (PaaS preferred)
 26. Analyze monthly costs by migration approach
@@ -257,21 +257,21 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 32. Review PostgreSQL database version information
 33. Examine software inventory on each server
 
-![Software inventory details](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01010.png)
+![Software inventory details](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01010.png)
 
 **Complete Knowledge Checks:**
 
 34. Find the count of powered-off Linux VMs
 
-![Filter powered-off Linux VMs](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01001.png)
+![Filter powered-off Linux VMs](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01001.png)
 
 35. Count Windows Server 2016 instances
 
-![Windows Server 2016 count](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01004.png)
+![Windows Server 2016 count](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01004.png)
 
 36. Calculate VM costs for the ContosoUniversity application
 
-![Application costs](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01011.png)
+![Application costs](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01011.png)
 
 37. Identify annual cost savings from the business case
 38. Determine security cost savings
@@ -305,30 +305,30 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 ### Actions
 
 **Setup and Preparation:**
-1. Navigate to `https://github.com//CZSK-MicroHacks/MicroHack-MigrateModernize` and click the "Fork" button in the top-right corner
+1. Navigate to `https://github.com/CZSK-MicroHacks/MicroHack-MigrateModernize` and click the "Fork" button in the top-right corner
 
-![Fork the repository](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/fork-button.png)
+![Fork the repository](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/fork-button.png)
 
 2. Select your account as the owner and click "Create fork"
 
-![Create fork dialog](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/create-fork.png)
+![Create fork dialog](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/create-fork.png)
 
 3. Once the fork is created, click the "Code" button and copy your forked repository URL
 
-![Copy clone URL](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/clone-url.png)
+![Copy clone URL](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/clone-url.png)
 
 4. Open Visual Studio 2022
 5. Select "Clone a repository" and paste your forked repository URL
 6. Navigate to Solution Explorer and locate the ContosoUniversity project
 7. Rebuild the project to verify it compiles successfully
 
-![Application running in IIS Express](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0030.png)
+![Application running in IIS Express](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0030.png)
 
 **Assess and Upgrade to .NET 9:**
 
 8. Right-click the ContosoUniversity project and select "Modernize"
 
-![Right-click Modernize menu](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0040.png)
+![Right-click Modernize menu](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0040.png)
 
 9. Sign in to GitHub Copilot if prompted
 10. Select Claude Sonnet 4.5 as the model
@@ -347,7 +347,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 **Resolve Cloud Readiness Issues:**
 19. Open the `dotnet-upgrade-report.md` file
 
-![Upgrade report with cloud readiness issues](https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0080.png)
+![Upgrade report with cloud readiness issues](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0080.png)
 
 20. Review the Cloud Readiness Issues section
 21. Click "Migrate from Windows AD to Microsoft Entra ID"
@@ -395,7 +395,7 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
    ```bash
    mkdir C:\gitrepos\lab
    cd C:\gitrepos\lab
-   git clone https://github.com//CZSK-MicroHacks/MicroHack-MigrateModernize.git
+   git clone https://github.com/CZSK-MicroHacks/MicroHack-MigrateModernize.git
    cd .\migrate-modernize-lab\src\AssetManager\
    code .
    ```

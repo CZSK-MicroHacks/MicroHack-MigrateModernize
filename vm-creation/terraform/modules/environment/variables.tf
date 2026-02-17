@@ -40,5 +40,5 @@ variable "admin_password" {
 variable "artifacts_location" {
   description = "The base URI where artifacts required by this template are located including a trailing '/'"
   type        = string
-  default     = "https://raw.githubusercontent.com//CZSK-MicroHacks/MicroHack-MigrateModernize/main/vm-creation-infra"
+  default     = "https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/main/vm-creation-infra"
 }
