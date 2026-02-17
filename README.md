@@ -157,7 +157,10 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 
 ![Add discovery source](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00948.png)
 
-20. Add credentials for Windows, Linux, SQL Server, and PostgreSQL workloads
+20. Add credentials for Windows, Linux, SQL Server, and PostgreSQL workloads (password: `demo!pass123`)
+    - Windows username: `Administrator`
+    - Linux username: `demoadmin`
+    - SQL username: `sa`
 
 ![Add workload credentials](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/009491.png)
 
