@@ -108,7 +108,7 @@ If you don't have the required software installed locally, you can use **GitHub 
    - Open the GitHub Copilot App Modernization extension from the Activity Bar
    - Use the following example prompt in the Copilot Chat:
      ```
-     Find the ASP.NET application in this repository and modernize it to .NET 9.
+     Find the ASP.NET application in this repository and modernize it to .NET 10.
      Upgrade the framework, migrate authentication from Windows AD to Microsoft Entra ID,
      and prepare it for Azure Container Apps deployment.
      ```
@@ -400,7 +400,7 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 
 ### Goal
 
-Modernize the Contoso University .NET Framework application to .NET 9 and deploy it to Azure Container Apps using GitHub Copilot's AI-powered code transformation capabilities.
+Modernize the Contoso University .NET Framework application to .NET 10 and deploy it to Azure Container Apps using GitHub Copilot's AI-powered code transformation capabilities.
 
 > **💡 Tip**: If you don't have Visual Studio 2022 installed locally, you can complete this challenge using **GitHub Codespaces**. See the [Alternative: Use GitHub Codespaces](#alternative-use-github-codespaces) section in the prerequisites for setup instructions.
 
@@ -426,7 +426,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 
 ![Application running in IIS Express](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0030.png)
 
-**Assess and Upgrade to .NET 9:**
+**Assess and Upgrade to .NET 10:**
 
 8. Right-click the ContosoUniversity project and select "Modernize"
 
@@ -466,7 +466,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 ### Success Criteria
 
 - ✅ ContosoUniversity solution cloned and builds successfully
-- ✅ Application upgraded from .NET Framework to .NET 9
+- ✅ Application upgraded from .NET Framework to .NET 10
 - ✅ Upgrade report generated showing all changes and issues
 - ✅ Authentication migrated from Windows AD to Microsoft Entra ID
 - ✅ All mandatory cloud readiness issues resolved
@@ -477,7 +477,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 
 - [GitHub Copilot for Visual Studio](https://learn.microsoft.com/visualstudio/ide/visual-studio-github-copilot-extension)
 - [Modernize .NET Applications](https://learn.microsoft.com/dotnet/architecture/modernize-with-azure-containers/)
-- [Migrate to .NET 9](https://learn.microsoft.com/dotnet/core/migration/)
+- [Migrate to .NET 10](https://learn.microsoft.com/dotnet/core/migration/)
 - [Azure Container Apps for .NET](https://learn.microsoft.com/azure/container-apps/quickstart-code-to-cloud)
 - [Microsoft Entra ID Authentication](https://learn.microsoft.com/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp)
 
@@ -1100,7 +1100,7 @@ Throughout this MicroHack, you've gained hands-on experience with the complete m
 - Cloned and configured the Contoso University .NET application repository
 - Used GitHub Copilot App Modernization extension in Visual Studio
 - Performed comprehensive code assessment for cloud readiness
-- Upgraded application from legacy .NET Framework to .NET 9
+- Upgraded application from legacy .NET Framework to .NET 10
 - Migrated from Windows AD to Microsoft Entra ID authentication
 - Resolved cloud readiness issues identified in the upgrade report
 - Deployed the modernized application to Azure Container Apps

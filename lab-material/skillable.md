@@ -412,7 +412,7 @@ Let's create an application for Contoso University:
 >
 > then there are **three workloads** on that VM (the VM, the database, and the web application). Each workload can follow its own migration path and target Azure service.
 >
-> When you migrate to Azure PaaS, the set of workloads in the **current environment** and the **target environment** may differ. Continuing the same example, you might migrate the SQL database to **Azure SQL Database** and the Tomcat web application to **Azure Container Apps**, while the original VM is decommissioned. In that target state, you now have **two workloads** (the database and the web application), even though you started with three on the on-premises VM.
+> When you migrate to Azure PaaS, the set of workloads in the **current environment** and the **target environment** may differ. Continuing the same example, you might migrate the SQL database to **Azure SQL Database** and the Tomcat web application to **Azure App Service**, while the original VM is decommissioned. In that target state, you now have **two workloads** (the database and the web application), even though you started with three on the on-premises VM.
     
 
 7. [ ] In **Properties**, select any criticality and complexity, then click in **Review + Create** and then **Create**
@@ -471,7 +471,7 @@ Hover over the info icons to learn how costs are calculated.
 This shows Gartner's 6R migration approaches:
 - **Rehost:** Lift-and-shift to Azure VMs
 - **Replatform:** Move to managed services (Azure SQL MI)
-- **Refactor:** Modernize to PaaS (Container Apps)
+- **Refactor:** Modernize to PaaS (App Service)
 
 The report recommends a mix of rehosting and replatforming for your workloads.
 Some applications will be replatformed, some others can only be rehosted. The total cost is the sum of all values
@@ -531,11 +531,11 @@ Can you spot:
 > ![Screenshot](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/01008.png)
 
 You will see three migration targets:
-- Web apps -> Azure Container Apps
+- Web apps -> App Service
 - SQL Instances -> Azure VMs  
 - Servers -> Azure VMs
 
-7. [ ] Open **Web apps to Azure Container Apps**
+7. [ ] Open **Web apps to App Service**
 
 ===
 # Web Apps Analysis
@@ -543,7 +543,7 @@ You will see three migration targets:
 Can you spot:
 1. [ ] Total number of applications?
 2. [ ] Applications "Ready with conditions"?
-3. [ ] Recommended Container Apps Environment configuration?
+3. [ ] Recommended App Service Plan?
 4. [ ] Top migration issues to address?
 
 From the application list, select **ContosoUniversity** to see detailed analysis.
@@ -685,7 +685,7 @@ You now have the foundation for informed migration decisions. In the following e
 - Use GitHub Copilot App Modernization to assess the application for cloud readiness
 - Upgrade the application from .NET Framework to .NET 9
 - Migrate authentication from Windows AD to Microsoft Entra ID
-- Resolve cloud readiness issues and deploy to Azure Container Apps
+- Resolve cloud readiness issues and deploy to Azure App Service
 
 ## Overview
 Before we begin, make sure you are logged into GitHub: [https://github.com/enterprises/skillable-events](https://github.com/enterprises/skillable-events "https://github.com/enterprises/skillable-events")
@@ -762,7 +762,7 @@ The first step is to do a code assessment, followed by a complete upgrade. For t
 
 # 3.3 Deploy the modernized .NET app to Azure
 
-Next we want to deploy our modernized application to Azure Container Apps.
+Next we want to deploy our modernized application to Azure App Service.
 
 1. Right click in the project, and select *Modernize* again
 
@@ -793,7 +793,7 @@ Next we want to deploy our modernized application to Azure Container Apps.
 3. ✅ **Framework Upgrade:** Successfully upgraded the application from legacy .NET Framework to modern .NET 9
 4. ✅ **Authentication Modernization:** Migrated from Windows Active Directory to Microsoft Entra ID for cloud-native identity management
 5. ✅ **Cloud Readiness:** Resolved all mandatory cloud readiness issues identified in the upgrade report
-6. ✅ **Azure Deployment:** Deployed the fully modernized application to Azure Container Apps
+6. ✅ **Azure Deployment:** Deployed the fully modernized application to Azure App Service
 
 **Key Takeaways:**
 - GitHub Copilot App Modernization automates complex upgrade tasks that would take days manually
@@ -820,7 +820,7 @@ You've successfully modernized a .NET application for Azure. In Exercise 4, you'
 ## Overview
 In this exercise, you'll modernize a Java Spring Boot application using GitHub Copilot App Modernization in VS Code. You'll learn how to assess a Java application for cloud readiness, identify migration issues, and automatically remediate them using AI-powered tools. The focus will be on migrating cloud dependencies from AWS to Azure while maintaining application functionality.
 
-**What You'll Do:** Use GitHub Copilot app modernization to assess, remediate, and modernize the Java application in preparation to migrate the workload to Azure Container Apps
+**What You'll Do:** Use GitHub Copilot app modernization to assess, remediate, and modernize the Java application in preparation to migrate the workload to App Service
 
 **What You'll Learn:** How GitHub Copilot app modernization works, demonstration of modernizing elements of legacy applications, and the modernization workflow
 
@@ -1038,7 +1038,7 @@ Click on individual issues in the report to see detailed recommendations. In pra
 | **What was found** | Migrate from AWS S3 to Azure Blob Storage for scalable and secure storage in Azure |
 | **Why this matters** | Migrating an application requires dependencies like storage to migrated alongside the code and data.  |
 | **Recommended solution** | Migrate from AWS S3 to Azure Blob Storage |
-| **Benefits** | Migrating from S3 to Azure Blob Storage enables seamless integration with other Azure services (like Azure Functions, Container Apps, and Azure AI), unified identity management through Azure Active Directory, and potential cost savings through features like automated tiering and lifecycle management policies. |
+| **Benefits** | Migrating from S3 to Azure Blob Storage enables seamless integration with other Azure services (like Azure Functions, App Service, and Azure AI), unified identity management through Azure Active Directory, and potential cost savings through features like automated tiering and lifecycle management policies. |
 
 ===
 
@@ -1265,7 +1265,7 @@ You've now completed the full migration lifecycle from assessment to deployment.
 - Upgraded application from legacy .NET Framework to .NET 9
 - Migrated from Windows AD to Microsoft Entra ID authentication
 - Resolved cloud readiness issues identified in the upgrade report
-- Deployed the modernized application to Azure Container Apps
+- Deployed the modernized application to Azure App Service
 
 **Exercise 4: Java Application Modernization**
 
