@@ -107,7 +107,7 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 
 6. Create a new Azure Migrate project in the Azure Portal
 7. Name your project (e.g., `migrate-prj`)
-8. Select an appropriate region (e.g., Canada)
+8. Select an appropriate region (e.g., Europe)
 
 ![Azure Migrate Discovery page](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0090.png)
 
