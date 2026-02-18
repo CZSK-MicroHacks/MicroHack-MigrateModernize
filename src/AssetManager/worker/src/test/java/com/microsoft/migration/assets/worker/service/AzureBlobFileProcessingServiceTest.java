@@ -20,6 +20,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureBlobFileProcessingServiceTest {
@@ -70,8 +71,8 @@ public class AzureBlobFileProcessingServiceTest {
         when(blobContainerClient.getBlobClient(testBlobName)).thenReturn(blobClient);
         when(blobClient.openInputStream()).thenReturn(mockBlobInputStream);
         
-        // Mock read behavior
-        when(mockBlobInputStream.read(any(byte[].class))).thenReturn(-1); // EOF
+        // Mock read behavior (lenient since it may not be called in all test scenarios)
+        lenient().when(mockBlobInputStream.read(any(byte[].class))).thenReturn(-1); // EOF
 
         // Act
         azureBlobFileProcessingService.downloadOriginal(testBlobName, tempFile);
