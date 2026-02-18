@@ -11,7 +11,7 @@ This MicroHack provides hands-on experience with the entire migration lifecycle 
 **Key Technologies:**
 - Azure Migrate for discovery and assessment
 - GitHub Copilot for AI-powered code modernization
-- Azure App Service for hosting modernized applications
+- Azure Container Apps for hosting modernized applications
 
 ## Environment creation
 
@@ -48,7 +48,7 @@ After completing this MicroHack you will:
 - Analyze migration readiness across servers, databases, and applications
 - Use GitHub Copilot to modernize .NET Framework applications to modern .NET
 - Leverage AI to migrate Java applications from AWS dependencies to Azure services
-- Deploy modernized applications to Azure App Service
+- Deploy modernized applications to Azure Container Apps
 
 ## MicroHack Challenges
 
@@ -110,7 +110,7 @@ If you don't have the required software installed locally, you can use **GitHub 
      ```
      Find the ASP.NET application in this repository and modernize it to .NET 9.
      Upgrade the framework, migrate authentication from Windows AD to Microsoft Entra ID,
-     and prepare it for Azure App Service deployment.
+     and prepare it for Azure Container Apps deployment.
      ```
    - The agent will analyze the application, create a migration plan, and execute the modernization autonomously
    
@@ -349,7 +349,7 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 
 25. Review recommended migration paths (PaaS preferred)
 26. Analyze monthly costs by migration approach
-27. Review Web Apps to App Service assessment details
+27. Review Web Apps to Azure Container Apps assessment details
 28. Identify "Ready with conditions" applications
 29. Review ContosoUniversity application details
 30. Check server operating system support status
@@ -400,7 +400,7 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 
 ### Goal
 
-Modernize the Contoso University .NET Framework application to .NET 9 and deploy it to Azure App Service using GitHub Copilot's AI-powered code transformation capabilities.
+Modernize the Contoso University .NET Framework application to .NET 9 and deploy it to Azure Container Apps using GitHub Copilot's AI-powered code transformation capabilities.
 
 > **💡 Tip**: If you don't have Visual Studio 2022 installed locally, you can complete this challenge using **GitHub Codespaces**. See the [Alternative: Use GitHub Codespaces](#alternative-use-github-codespaces) section in the prerequisites for setup instructions.
 
@@ -459,7 +459,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 
 **Deploy to Azure:**
 
-25. Allow GitHub Copilot to complete the Azure App Service deployment
+25. Allow GitHub Copilot to complete the Azure Container Apps deployment
 26. Verify the deployment succeeds
 27. Test the deployed application in Azure
 
@@ -470,7 +470,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 - ✅ Upgrade report generated showing all changes and issues
 - ✅ Authentication migrated from Windows AD to Microsoft Entra ID
 - ✅ All mandatory cloud readiness issues resolved
-- ✅ Application successfully deployed to Azure App Service
+- ✅ Application successfully deployed to Azure Container Apps
 - ✅ Deployed application is accessible and functional
 
 ### Learning Resources
@@ -478,7 +478,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 - [GitHub Copilot for Visual Studio](https://learn.microsoft.com/visualstudio/ide/visual-studio-github-copilot-extension)
 - [Modernize .NET Applications](https://learn.microsoft.com/dotnet/architecture/modernize-with-azure-containers/)
 - [Migrate to .NET 9](https://learn.microsoft.com/dotnet/core/migration/)
-- [Azure App Service for .NET](https://learn.microsoft.com/azure/app-service/quickstart-dotnetcore)
+- [Azure Container Apps for .NET](https://learn.microsoft.com/azure/container-apps/quickstart-code-to-cloud)
 - [Microsoft Entra ID Authentication](https://learn.microsoft.com/azure/active-directory/develop/quickstart-v2-aspnet-core-webapp)
 
 ---
@@ -620,11 +620,12 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 4. Create a main infrastructure template file (e.g., `main.bicep` or `main.tf`)
 5. Define the following resources in your template:
    - Resource Group
-   - App Service Plan
-   - App Service (for ContosoUniversity)
+   - Container Apps Environment
+   - Container App (for ContosoUniversity)
    - Azure SQL Database
    - Azure Storage Account (for AssetManager)
    - Application Insights
+   - Log Analytics Workspace
 
 **Parameterize for Multiple Environments:**
 
@@ -682,10 +683,10 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 **Deploy Application Code:**
 
 26. Create application deployment scripts
-27. Build application artifacts (publish .NET app, build Java JAR)
-28. Upload artifacts to Azure App Service using:
-    - Azure CLI: `az webapp deploy`
-    - PowerShell: `Publish-AzWebApp`
+27. Build application container images or source code
+28. Deploy to Azure Container Apps using:
+    - Azure CLI: `az containerapp up` or `az containerapp create`
+    - GitHub Actions with Container Apps deployment action
 29. Run database migrations as part of deployment
 30. Verify application starts successfully
 
@@ -700,7 +701,7 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 
 - ✅ Infrastructure as Code templates created (Bicep or Terraform)
 - ✅ Environment-specific parameter files for dev, test, and prod
-- ✅ All Azure resources defined as code (App Service, SQL, Storage, etc.)
+- ✅ All Azure resources defined as code (Container Apps, SQL, Storage, etc.)
 - ✅ Database schema deployment scripts created
 - ✅ Deployment automation scripts (PowerShell/Bash) functional
 - ✅ Successful deployment to at least one environment
@@ -731,7 +732,7 @@ Establish comprehensive monitoring and observability for your applications and p
 
 **Enable Application Insights:**
 
-1. Navigate to your App Service in Azure Portal
+1. Navigate to your Container App in Azure Portal
 2. Enable Application Insights integration
 3. Note the instrumentation key and connection string
 4. Configure the ContosoUniversity application to use Application Insights:
@@ -772,7 +773,7 @@ Establish comprehensive monitoring and observability for your applications and p
 11. Create a Log Analytics workspace
 12. Connect Application Insights to Log Analytics
 13. Enable diagnostic logging for:
-    - App Service logs (application, web server, deployment)
+    - Container Apps logs (console, system)
     - SQL Database query performance logs
     - Azure Storage analytics logs
 
@@ -822,8 +823,8 @@ Establish comprehensive monitoring and observability for your applications and p
 
 24. Document incident response procedures
 25. Create automated remediation runbooks:
-    - Auto-restart App Service on repeated failures
-    - Scale-out on high CPU/memory
+    - Auto-restart Container App on repeated failures
+    - Scale-out replicas on high CPU/memory
     - Database connection pool adjustment
 26. Set up Azure Automation accounts for runbook execution
 
@@ -840,7 +841,7 @@ Establish comprehensive monitoring and observability for your applications and p
 **Test Monitoring and Alerting:**
 
 31. Simulate failures to test alert configurations:
-    - Stop App Service to trigger availability alerts
+    - Stop Container App to trigger availability alerts
     - Generate load to test performance alerts
     - Introduce errors to test failure detection
 32. Verify alert notifications are received
@@ -948,13 +949,14 @@ Create a complete end-to-end deployment pipeline that connects all previous chal
 **Configure Application Deployment Stage:**
 
 17. Create application deployment jobs
-18. Deploy applications to App Service:
-    - Use deployment slots for production (blue-green deployment)
-    - Deploy to staging slot first
-    - Run smoke tests on staging
-    - Swap to production slot
+18. Deploy applications to Azure Container Apps:
+    - Build and push container images to Azure Container Registry
+    - Deploy new revisions to Container Apps
+    - Configure revision management for blue-green deployment
+    - Run smoke tests on new revision
+    - Activate new revision and deactivate old
 19. Configure deployment settings:
-    - App Service configuration
+    - Container Apps environment variables
     - Connection strings from Key Vault
     - Application Insights instrumentation key
 20. Implement deployment health checks
@@ -972,8 +974,8 @@ Create a complete end-to-end deployment pipeline that connects all previous chal
 
 **Implement Progressive Deployment:**
 
-24. Configure traffic splitting for canary deployments
-25. Start with 10% traffic to new version
+24. Configure traffic splitting for canary deployments using Container Apps revisions
+25. Start with 10% traffic to new revision
 26. Monitor key metrics during canary phase:
     - Error rates
     - Response times
@@ -1003,7 +1005,7 @@ Create a complete end-to-end deployment pipeline that connects all previous chal
 33. Add security scanning stages:
     - Static Application Security Testing (SAST)
     - Dependency vulnerability scanning
-    - Container scanning if using containers
+    - Container image scanning
 34. Implement secret scanning to prevent credential leaks
 35. Add compliance checks:
     - Policy validation (Azure Policy)
@@ -1017,7 +1019,7 @@ Create a complete end-to-end deployment pipeline that connects all previous chal
     - Availability drops below threshold
     - Manual rollback capability
 38. Create rollback workflow:
-    - Revert to previous deployment slot
+    - Revert to previous Container Apps revision
     - Restore previous database version if needed
     - Notify team of rollback
 39. Document rollback procedures
@@ -1036,7 +1038,7 @@ Create a complete end-to-end deployment pipeline that connects all previous chal
 - ✅ Build pipelines execute successfully with tests and quality checks
 - ✅ Infrastructure deployment automated via IaC templates
 - ✅ Database migrations integrated into deployment pipeline
-- ✅ Application deployment to Azure App Service automated
+- ✅ Application deployment to Azure Container Apps automated
 - ✅ Multiple environments configured (Dev, Test, Prod) with appropriate gates
 - ✅ Blue-green or canary deployment strategy implemented
 - ✅ Automated testing stages validate deployments
@@ -1053,8 +1055,8 @@ Create a complete end-to-end deployment pipeline that connects all previous chal
 - [GitHub Actions Documentation](https://docs.github.com/actions)
 - [GitHub Actions for Azure](https://learn.microsoft.com/azure/developer/github/github-actions)
 - [Azure DevOps vs GitHub Actions](https://learn.microsoft.com/azure/developer/github/github-actions-vs-azure-devops)
-- [Deployment Slots in App Service](https://learn.microsoft.com/azure/app-service/deploy-staging-slots)
-- [Blue-Green Deployments](https://learn.microsoft.com/azure/architecture/example-scenario/blue-green-spring/blue-green-spring)
+- [Azure Container Apps Revisions](https://learn.microsoft.com/azure/container-apps/revisions)
+- [Blue-Green Deployments with Container Apps](https://learn.microsoft.com/azure/container-apps/blue-green-deployment)
 - [Canary Deployments](https://learn.microsoft.com/azure/architecture/framework/devops/deployment-patterns)
 - [GitHub Environments](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment)
 - [Azure Load Testing](https://learn.microsoft.com/azure/load-testing/overview-what-is-azure-load-testing)
@@ -1156,7 +1158,7 @@ Throughout this MicroHack, you've gained hands-on experience with the complete m
 - AI-powered code modernization with GitHub Copilot
 - Migration strategy selection (Rehost, Replatform, Refactor)
 - Cloud readiness assessment and remediation
-- Azure App Service deployment
+- Azure Container Apps deployment
 - AppCAT assessment for Java applications
 - Automated validation and testing workflows
 - Infrastructure as Code (IaC) with Bicep/Terraform
