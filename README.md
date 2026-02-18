@@ -618,15 +618,15 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 **Define Azure Infrastructure:**
 
 4. Create a main infrastructure template file (e.g., `main.bicep` or `main.tf`)
-5. Define the following resources in your template:
+5. Define the following resources in your template (in dependency order):
    - Resource Group
    - Log Analytics Workspace
    - Application Insights
-   - Container Apps Environment
    - Azure Container Registry
-   - Container App (for ContosoUniversity)
+   - Container Apps Environment (depends on Log Analytics Workspace)
    - Azure SQL Database
    - Azure Storage Account (for AssetManager)
+   - Container App (depends on Container Apps Environment and ACR)
 
 **Parameterize for Multiple Environments:**
 
@@ -686,8 +686,8 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 26. Create application deployment scripts
 27. Build and push container images to Azure Container Registry
 28. Deploy to Azure Container Apps using:
-    - Azure CLI: `az containerapp up` (for source code deployment)
-    - Azure CLI: `az containerapp create` (for pre-built container images from ACR)
+    - `az containerapp up` - Quick deployments from source code (suitable for development)
+    - `az containerapp create` - Production deployments using pre-built, tested images from ACR
     - GitHub Actions with Container Apps deployment action
 29. Run database migrations as part of deployment
 30. Verify application starts successfully
