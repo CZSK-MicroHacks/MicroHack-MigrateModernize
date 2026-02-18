@@ -2,6 +2,7 @@
 
 param(
     [Parameter(Mandatory=$false)]
+    [ValidateRange(1, [int]::MaxValue)]
     [int]$NumberOfEnvironments = 1
 )
 
