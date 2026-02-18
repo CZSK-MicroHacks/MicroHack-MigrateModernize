@@ -399,7 +399,7 @@ Transform raw discovery data into actionable insights by cleaning data, grouping
 
 Modernize the Contoso University .NET Framework application to .NET 9 and deploy it to Azure App Service using GitHub Copilot's AI-powered code transformation capabilities.
 
-> **💡 Tip**: If you don't have Visual Studio 2022 installed locally, you can complete this challenge using **GitHub Codespaces**. See the [Alternative: Use GitHub Codespaces](#alternative-use-github-codespaces-recommended-if-you-dont-have-required-software-installed-locally) section in the prerequisites for setup instructions.
+> **💡 Tip**: If you don't have Visual Studio 2022 installed locally, you can complete this challenge using **GitHub Codespaces**. See the [Alternative: Use GitHub Codespaces](#alternative-use-github-codespaces) section in the prerequisites for setup instructions.
 
 ### Actions
 
@@ -486,7 +486,7 @@ Modernize the Contoso University .NET Framework application to .NET 9 and deploy
 
 Modernize the Asset Manager Java Spring Boot application for Azure deployment, migrating from AWS dependencies to Azure services using GitHub Copilot App Modernization in VS Code.
 
-> **💡 Tip**: If you don't have Docker Desktop, JDK, or Maven installed locally, you can complete this challenge using **GitHub Codespaces**. See the [Alternative: Use GitHub Codespaces](#alternative-use-github-codespaces-recommended-if-you-dont-have-required-software-installed-locally) section in the prerequisites for setup instructions.
+> **💡 Tip**: If you don't have Docker Desktop, JDK, or Maven installed locally, you can complete this challenge using **GitHub Codespaces**. See the [Alternative: Use GitHub Codespaces](#alternative-use-github-codespaces) section in the prerequisites for setup instructions.
 
 ### Actions
 
