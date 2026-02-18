@@ -14,7 +14,6 @@ builder.Services.AddDbContext<SchoolContext>(options =>
 
 // Register custom services
 builder.Services.AddScoped<IMessageQueue, InMemoryMessageQueue>();
-builder.Services.AddScoped<MessageQueueManager>();
 builder.Services.AddScoped<LoggingService>();
 builder.Services.AddScoped<NotificationService>();
 

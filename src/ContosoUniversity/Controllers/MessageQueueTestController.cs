@@ -1,5 +1,6 @@
 using System;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.Infrastructure;
 using ContosoUniversity.Services;
 using ContosoUniversity.Models;
@@ -15,23 +16,23 @@ namespace ContosoUniversity.Controllers
             _notificationService = new NotificationService();
         }
 
-        public ActionResult Index()
+        public IActionResult Index()
         {
             ViewBag.Message = "Message Queue Test Page";
             return View();
         }
 
         [HttpPost]
-        public ActionResult SendTestNotification()
+        public IActionResult SendTestNotification()
         {
             try
             {
-                _notificationService.SendNotification(
+                notificationService.SendNotification(
                     "Test", 
                     Guid.NewGuid().ToString(), 
                     "Test Entity", 
                     EntityOperation.CREATE, 
-                    User.Identity.Name ?? "TestUser"
+                    User.Identity?.Name ?? "TestUser"
                 );
 
                 ViewBag.Message = "Test notification sent successfully!";
@@ -47,12 +48,12 @@ namespace ContosoUniversity.Controllers
         }
 
         [HttpPost]
-        public ActionResult ReceiveNotifications()
+        public IActionResult ReceiveNotifications()
         {
             try
             {
                 var notifications = new System.Collections.Generic.List<Notification>();
-                Notification notification;
+                Notification? notification;
                 
                 // Try to receive up to 10 notifications
                 int count = 0;
@@ -76,7 +77,7 @@ namespace ContosoUniversity.Controllers
         }
 
         [HttpPost]
-        public ActionResult TestBasicQueue()
+        public IActionResult TestBasicQueue()
         {
             try
             {
@@ -107,7 +108,7 @@ namespace ContosoUniversity.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetQueueStatus()
+        public IActionResult GetQueueStatus()
         {
             try
             {

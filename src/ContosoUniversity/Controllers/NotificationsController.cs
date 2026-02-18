@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.Services;
 using ContosoUniversity.Models;
 
@@ -30,14 +31,14 @@ namespace ContosoUniversity.Controllers
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error retrieving notifications: {ex.Message}");
-                return Json(new { success = false, message = "Error retrieving notifications" }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, message = "Error retrieving notifications" });
             }
 
             return Json(new { 
                 success = true, 
                 notifications = notifications,
                 count = notifications.Count 
-            }, JsonRequestBehavior.AllowGet);
+            });
         }
 
         // POST: api/notifications/mark-read
@@ -57,7 +58,7 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Notifications/Index - Admin notification dashboard
-        public ActionResult Index()
+        public IActionResult Index()
         {
             return View();
         }
