@@ -620,12 +620,13 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 4. Create a main infrastructure template file (e.g., `main.bicep` or `main.tf`)
 5. Define the following resources in your template:
    - Resource Group
+   - Log Analytics Workspace
+   - Application Insights
    - Container Apps Environment
+   - Azure Container Registry
    - Container App (for ContosoUniversity)
    - Azure SQL Database
    - Azure Storage Account (for AssetManager)
-   - Application Insights
-   - Log Analytics Workspace
 
 **Parameterize for Multiple Environments:**
 
@@ -683,9 +684,10 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 **Deploy Application Code:**
 
 26. Create application deployment scripts
-27. Build application container images or source code
+27. Build and push container images to Azure Container Registry
 28. Deploy to Azure Container Apps using:
-    - Azure CLI: `az containerapp up` or `az containerapp create`
+    - Azure CLI: `az containerapp up` (for source code deployment)
+    - Azure CLI: `az containerapp create` (for pre-built container images from ACR)
     - GitHub Actions with Container Apps deployment action
 29. Run database migrations as part of deployment
 30. Verify application starts successfully
@@ -701,12 +703,13 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 
 - ✅ Infrastructure as Code templates created (Bicep or Terraform)
 - ✅ Environment-specific parameter files for dev, test, and prod
-- ✅ All Azure resources defined as code (Container Apps, SQL, Storage, etc.)
+- ✅ All Azure resources defined as code (Container Apps, Container Registry, SQL, Storage, etc.)
 - ✅ Database schema deployment scripts created
 - ✅ Deployment automation scripts (PowerShell/Bash) functional
 - ✅ Successful deployment to at least one environment
 - ✅ Application configuration managed through Azure services (App Configuration/Key Vault)
-- ✅ Application code deploys successfully to provisioned infrastructure
+- ✅ Container images built and pushed to Azure Container Registry
+- ✅ Application deploys successfully to Container Apps from ACR
 - ✅ All deployments are idempotent (can be run multiple times safely)
 - ✅ Comprehensive deployment documentation created
 
@@ -715,10 +718,12 @@ Build a repeatable Infrastructure as Code (IaC) deployment method that produces 
 - [Azure Bicep Documentation](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)
 - [Terraform on Azure](https://learn.microsoft.com/azure/developer/terraform/)
 - [Infrastructure as Code Best Practices](https://learn.microsoft.com/azure/architecture/framework/devops/iac)
+- [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview)
+- [Azure Container Registry](https://learn.microsoft.com/azure/container-registry/container-registry-intro)
 - [Azure App Configuration](https://learn.microsoft.com/azure/azure-app-configuration/overview)
 - [Azure Key Vault](https://learn.microsoft.com/azure/key-vault/general/overview)
 - [Entity Framework Migrations](https://learn.microsoft.com/ef/core/managing-schemas/migrations/)
-- [Azure CLI Deployment](https://learn.microsoft.com/cli/azure/webapp)
+- [Deploy to Container Apps](https://learn.microsoft.com/azure/container-apps/quickstart-code-to-cloud)
 
 ---
 
@@ -1114,10 +1119,11 @@ Throughout this MicroHack, you've gained hands-on experience with the complete m
 ### Challenge 5: Infrastructure as Code Deployment
 
 - Created Infrastructure as Code templates (Bicep or Terraform)
-- Defined Azure resources as code (Container Apps, SQL Database, Storage Account, Application Insights)
+- Defined Azure resources as code (Container Apps, Container Registry, SQL Database, Storage Account, Application Insights)
 - Parameterized infrastructure for multiple environments (dev, test, prod)
 - Implemented database schema deployment scripts
 - Created automated deployment scripts (PowerShell and Bash)
+- Built and pushed container images to Azure Container Registry
 - Configured Azure App Configuration or Key Vault for application settings
 - Successfully deployed infrastructure and applications to Azure
 - Established repeatable, consistent deployment process
