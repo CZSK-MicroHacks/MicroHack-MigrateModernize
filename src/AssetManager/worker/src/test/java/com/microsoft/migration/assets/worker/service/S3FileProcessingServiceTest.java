@@ -1,5 +1,9 @@
 package com.microsoft.migration.assets.worker.service;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.options.BlobUploadFromFileOptions;
 import com.microsoft.migration.assets.worker.repository.ImageMetadataRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,12 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import software.amazon.awssdk.core.ResponseInputStream;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +25,13 @@ import static org.mockito.Mockito.*;
 public class S3FileProcessingServiceTest {
 
     @Mock
-    private S3Client s3Client;
+    private BlobServiceClient blobServiceClient;
+
+    @Mock
+    private BlobContainerClient blobContainerClient;
+
+    @Mock
+    private BlobClient blobClient;
 
     @Mock
     private ImageMetadataRepository imageMetadataRepository;
@@ -35,45 +39,45 @@ public class S3FileProcessingServiceTest {
     @InjectMocks
     private S3FileProcessingService s3FileProcessingService;
 
-    private final String bucketName = "test-bucket";
+    private final String containerName = "test-container";
     private final String testKey = "test-image.jpg";
     private final String thumbnailKey = "test-image_thumbnail.jpg";
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(s3FileProcessingService, "bucketName", bucketName);
+        ReflectionTestUtils.setField(s3FileProcessingService, "containerName", containerName);
+        lenient().when(blobServiceClient.getBlobContainerClient(any())).thenReturn(blobContainerClient);
+        lenient().when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient);
     }
 
     @Test
-    void getStorageTypeReturnsS3() {
+    void getStorageTypeReturnsBlob() {
         // Act
         String result = s3FileProcessingService.getStorageType();
 
         // Assert
-        assertEquals("s3", result);
+        assertEquals("blob", result);
     }
 
     @Test
-    void downloadOriginalCopiesFileFromS3() throws Exception {
+    void downloadOriginalCopiesFileFromBlobStorage() throws Exception {
         // Arrange
         Path tempFile = Files.createTempFile("download-", ".tmp");
-        @SuppressWarnings("unchecked")
-        ResponseInputStream<GetObjectResponse> mockResponse = mock(ResponseInputStream.class);
 
-        when(s3Client.getObject(any(GetObjectRequest.class))).thenReturn(mockResponse);
+        doNothing().when(blobClient).downloadStream(any());
 
         // Act
         s3FileProcessingService.downloadOriginal(testKey, tempFile);
 
         // Assert
-        verify(s3Client).getObject(any(GetObjectRequest.class));
+        verify(blobClient).downloadStream(any());
 
         // Clean up
         Files.deleteIfExists(tempFile);
     }
 
     @Test
-    void uploadThumbnailPutsFileToS3() throws Exception {
+    void uploadThumbnailPutsFileToBlobStorage() throws Exception {
         // Arrange
         Path tempFile = Files.createTempFile("thumbnail-", ".tmp");
         when(imageMetadataRepository.findAll()).thenReturn(Collections.emptyList());
@@ -82,7 +86,7 @@ public class S3FileProcessingServiceTest {
         s3FileProcessingService.uploadThumbnail(tempFile, thumbnailKey, "image/jpeg");
 
         // Assert
-        verify(s3Client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+        verify(blobClient).uploadFromFileWithResponse(any(BlobUploadFromFileOptions.class), any(), any());
 
         // Clean up
         Files.deleteIfExists(tempFile);
@@ -100,3 +104,4 @@ public class S3FileProcessingServiceTest {
         assertEquals("image.jpg", result);
     }
 }
+
