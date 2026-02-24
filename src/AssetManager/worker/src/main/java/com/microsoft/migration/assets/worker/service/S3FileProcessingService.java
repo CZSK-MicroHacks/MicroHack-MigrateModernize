@@ -4,18 +4,16 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobHttpHeaders;
-import com.azure.storage.blob.options.BlobParallelUploadOptions;
+import com.azure.storage.blob.options.BlobUploadFromFileOptions;
 import com.microsoft.migration.assets.worker.repository.ImageMetadataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 @Service
 @Profile("!dev")
@@ -43,10 +41,10 @@ public class S3FileProcessingService extends AbstractFileProcessingService {
         BlobClient blobClient = containerClient.getBlobClient(key);
 
         BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(contentType);
-        BlobParallelUploadOptions options = new BlobParallelUploadOptions(Files.newInputStream(source))
+        BlobUploadFromFileOptions options = new BlobUploadFromFileOptions(source.toString())
                 .setHeaders(headers);
 
-        blobClient.uploadWithResponse(options, null, null);
+        blobClient.uploadFromFileWithResponse(options, null, null);
 
         // Extract the original key from the thumbnail key
         String originalKey = extractOriginalKey(key);

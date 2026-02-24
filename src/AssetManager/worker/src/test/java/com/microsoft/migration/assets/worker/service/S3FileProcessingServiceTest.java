@@ -3,7 +3,7 @@ package com.microsoft.migration.assets.worker.service;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.options.BlobParallelUploadOptions;
+import com.azure.storage.blob.options.BlobUploadFromFileOptions;
 import com.microsoft.migration.assets.worker.repository.ImageMetadataRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ public class S3FileProcessingServiceTest {
         s3FileProcessingService.uploadThumbnail(tempFile, thumbnailKey, "image/jpeg");
 
         // Assert
-        verify(blobClient).uploadWithResponse(any(BlobParallelUploadOptions.class), any(), any());
+        verify(blobClient).uploadFromFileWithResponse(any(BlobUploadFromFileOptions.class), any(), any());
 
         // Clean up
         Files.deleteIfExists(tempFile);
