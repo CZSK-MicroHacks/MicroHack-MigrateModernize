@@ -1,0 +1,43 @@
+{
+  "name": "MicroHack - Migrate & Modernize",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "8",
+      "installMaven": "true",
+      "installGradle": "false",
+      "additionalVersions": "21"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "10.0"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/azure-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "github.copilot-chat",
+        "github.copilot-app-modernization",
+        "vscjava.vscode-java-pack",
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-1.8",
+            "path": "/usr/local/sdkman/candidates/java/8.0",
+            "default": true
+          },
+          {
+            "name": "JavaSE-21",
+            "path": "/usr/local/sdkman/candidates/java/21.0"
+          }
+        ]
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Development environment ready! JDK 8 (default) and JDK 21 available. Use sdk use java <version> to switch.'"
+}
