@@ -46,8 +46,8 @@ public class S3FileProcessingServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(s3FileProcessingService, "containerName", containerName);
-        when(blobServiceClient.getBlobContainerClient(any())).thenReturn(blobContainerClient);
-        when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient);
+        lenient().when(blobServiceClient.getBlobContainerClient(any())).thenReturn(blobContainerClient);
+        lenient().when(blobContainerClient.getBlobClient(any())).thenReturn(blobClient);
     }
 
     @Test
