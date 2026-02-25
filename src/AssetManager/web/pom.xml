@@ -10,7 +10,7 @@
     </parent>
 
     <properties>
-        <spring-cloud-azure.version>4.20.0</spring-cloud-azure.version>
+        <spring-cloud-azure.version>4.19.0</spring-cloud-azure.version>
     </properties>
 
     <artifactId>assets-manager-web</artifactId>
