@@ -14,7 +14,7 @@ public class AwsS3Config {
     private String endpoint;
 
     @Bean
-    public BlobServiceClient blobServiceClient() {
+    BlobServiceClient blobServiceClient() {
         return new BlobServiceClientBuilder()
                 .endpoint(endpoint)
                 .credential(new DefaultAzureCredentialBuilder().build())

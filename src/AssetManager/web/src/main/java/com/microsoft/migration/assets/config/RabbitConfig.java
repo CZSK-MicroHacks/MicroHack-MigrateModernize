@@ -17,14 +17,14 @@ public class RabbitConfig {
     public static final String IMAGE_PROCESSING_QUEUE = "image-processing";
 
     @Bean
-    public ServiceBusAdministrationClient adminClient(AzureServiceBusProperties properties, TokenCredential credential) {
+    ServiceBusAdministrationClient adminClient(AzureServiceBusProperties properties, TokenCredential credential) {
         return new ServiceBusAdministrationClientBuilder()
                 .credential(properties.getFullyQualifiedNamespace(), credential)
                 .buildClient();
     }
 
     @Bean
-    public QueueProperties imageProcessingQueue(ServiceBusAdministrationClient adminClient) {
+    QueueProperties imageProcessingQueue(ServiceBusAdministrationClient adminClient) {
         try {
             return adminClient.getQueue(IMAGE_PROCESSING_QUEUE);
         } catch (ResourceNotFoundException e) {
@@ -33,7 +33,7 @@ public class RabbitConfig {
     }
 
     @Bean
-    public PropertiesSupplier<ConsumerIdentifier, ProcessorProperties> processorPropertiesSupplier() {
+    PropertiesSupplier<ConsumerIdentifier, ProcessorProperties> processorPropertiesSupplier() {
         return key -> {
             ProcessorProperties processorProperties = new ProcessorProperties();
             processorProperties.setAutoComplete(false);
