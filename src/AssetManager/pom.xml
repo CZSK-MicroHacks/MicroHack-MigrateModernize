@@ -17,6 +17,7 @@
     
     <properties>
         <java.version>8</java.version>
+        <postgresql.version>42.5.5</postgresql.version>
     </properties>
 
     <modules>
