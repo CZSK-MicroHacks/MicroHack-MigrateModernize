@@ -1,23 +1,25 @@
 # Multi-stage build for AssetManager Worker Service
+# Build context must be the AssetManager root directory
 # Stage 1: Build the application
 FROM maven:3.9-eclipse-temurin-21-jammy AS build
 
 WORKDIR /app
 
-# Copy parent pom first
-COPY pom.xml ../pom.xml
+# Copy parent pom
+COPY pom.xml ./pom.xml
 
-# Copy worker module pom
-COPY worker/pom.xml ./pom.xml
+# Copy module poms for dependency resolution
+COPY web/pom.xml ./web/pom.xml
+COPY worker/pom.xml ./worker/pom.xml
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN mvn dependency:go-offline -B -f ./pom.xml
+# Download dependencies (cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B -pl worker -am
 
-# Copy source code
-COPY worker/src ./src
+# Copy worker source code
+COPY worker/src ./worker/src
 
-# Build the application
-RUN mvn clean package -DskipTests -B
+# Build the worker module
+RUN mvn clean package -DskipTests -B -pl worker -am
 
 # Stage 2: Create the runtime image
 FROM eclipse-temurin:21-jre-jammy
@@ -28,7 +30,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app
 
 # Copy the jar from build stage
-COPY --from=build /app/target/assets-manager-worker-*.jar app.jar
+COPY --from=build /app/worker/target/assets-manager-worker-*.jar app.jar
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app

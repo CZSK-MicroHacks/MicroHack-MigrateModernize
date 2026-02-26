@@ -1,26 +1,31 @@
 # Multi-stage build for AssetManager Web Application
+# Build context must be the AssetManager root directory
 # Stage 1: Build the application
 FROM maven:3.9-eclipse-temurin-21-jammy AS build
 
 WORKDIR /app
 
-# Copy parent pom first
-COPY pom.xml ../pom.xml
+# Copy parent pom
+COPY pom.xml ./pom.xml
 
-# Copy web module pom
-COPY web/pom.xml ./pom.xml
+# Copy module poms for dependency resolution
+COPY web/pom.xml ./web/pom.xml
+COPY worker/pom.xml ./worker/pom.xml
 
-# Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN mvn dependency:go-offline -B -f ./pom.xml
+# Download dependencies (cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B -pl web -am
 
-# Copy source code
-COPY web/src ./src
+# Copy web source code
+COPY web/src ./web/src
 
-# Build the application
-RUN mvn clean package -DskipTests -B
+# Build the web module
+RUN mvn clean package -DskipTests -B -pl web -am
 
 # Stage 2: Create the runtime image
 FROM eclipse-temurin:21-jre-jammy
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -28,7 +33,7 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app
 
 # Copy the jar from build stage
-COPY --from=build /app/target/assets-manager-web-*.jar app.jar
+COPY --from=build /app/web/target/assets-manager-web-*.jar app.jar
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app
