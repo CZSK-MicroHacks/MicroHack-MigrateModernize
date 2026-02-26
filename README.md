@@ -15,6 +15,8 @@ This MicroHack provides hands-on experience with the entire migration lifecycle 
 
 ## Environment creation
 
+Students: Please skip this part, the environment is already prepared for you.
+
 Install Azure PowerShell and authenticated to your Azure subscription:
 ```PowerShell
 Install-Module Az
