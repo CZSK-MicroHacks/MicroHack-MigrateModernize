@@ -34,10 +34,11 @@
             <groupId>com.azure.spring</groupId>
             <artifactId>spring-messaging-azure-servicebus</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-messaging-servicebus</artifactId>
-        </dependency>
+        <!-- TODO: spring-messaging-azure-servicebus provides the Spring messaging API classes
+             (ServiceBusTemplate, @ServiceBusListener) but does NOT transitively include the
+             Azure SDK transport library. Spring Cloud Azure auto-configuration requires
+             ServiceBusClientBuilder.class on the classpath to activate — check if you need
+             to add com.azure:azure-messaging-servicebus as an explicit dependency. -->
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
