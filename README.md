@@ -190,9 +190,10 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 
 **Understand Your Environment:**
 1. Access the Azure Portal using the provided credentials
-2. Navigate to the `on-prem` resource group
-3. Connect to the Hyper-V host VM (`lab@lab.LabInstance.Id-vm`)
-4. Explore the nested VMs running inside the host
+2. Navigate to the `onpremXXX-rg` resource group
+3. Connect to the Hyper-V host VM `onpremXXX-vm` (login: `adminuser`, password: `demo!pass123`)
+   - User RDP or Azure Bastion
+5. Explore the nested VMs running inside the host
 
 ![Hyper-V Manager showing nested VMs](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
 
@@ -203,7 +204,7 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 **Create Azure Migrate Project:**  
 
 6. Create a new Azure Migrate project in the Azure Portal
-7. Name your project (e.g., `migrate-prj`)
+7. Name your project (e.g., `migrate-prjXXX`)
 8. Select an appropriate region (e.g., Europe)
 
 ![Azure Migrate Discovery page](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/0090.png)
@@ -220,7 +221,7 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 ![Extract VHD to F drive](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00914.png)
 
 12. Create a new Hyper-V VM using the extracted VHD:
-    - Name: `AZMAppliance`
+    - Name: `AZMApplianceXXX`
     - Generation: 1
     - RAM: 16384 MB
     - Network: NestedSwitch
