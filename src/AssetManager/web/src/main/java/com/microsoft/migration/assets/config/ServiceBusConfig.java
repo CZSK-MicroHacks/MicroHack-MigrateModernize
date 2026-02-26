@@ -5,10 +5,15 @@ import com.azure.core.exception.ResourceNotFoundException;
 import com.azure.messaging.servicebus.administration.ServiceBusAdministrationClient;
 import com.azure.messaging.servicebus.administration.ServiceBusAdministrationClientBuilder;
 import com.azure.messaging.servicebus.administration.models.QueueProperties;
-import com.azure.spring.cloud.autoconfigure.implementation.servicebus.properties.AzureServiceBusProperties;
 import com.azure.spring.messaging.ConsumerIdentifier;
 import com.azure.spring.messaging.PropertiesSupplier;
+import com.azure.spring.messaging.servicebus.core.DefaultServiceBusNamespaceProducerFactory;
+import com.azure.spring.messaging.servicebus.core.ServiceBusProducerFactory;
+import com.azure.spring.messaging.servicebus.core.ServiceBusTemplate;
+import com.azure.spring.messaging.servicebus.core.properties.NamespaceProperties;
 import com.azure.spring.messaging.servicebus.core.properties.ProcessorProperties;
+import com.azure.spring.cloud.service.servicebus.properties.ServiceBusEntityType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,14 +25,18 @@ public class ServiceBusConfig {
     @Value("${azure.servicebus.queue.name:image-processing}")
     private String queueName;
 
+    @Value("${spring.cloud.azure.servicebus.namespace:}")
+    private String serviceBusNamespace;
+
     public String getQueueName() {
         return queueName;
     }
 
     @Bean
-    ServiceBusAdministrationClient adminClient(AzureServiceBusProperties properties, TokenCredential credential) {
+    ServiceBusAdministrationClient adminClient(TokenCredential credential) {
+        String fqdn = serviceBusNamespace.contains(".") ? serviceBusNamespace : serviceBusNamespace + ".servicebus.windows.net";
         return new ServiceBusAdministrationClientBuilder()
-                .credential(properties.getFullyQualifiedNamespace(), credential)
+                .credential(fqdn, credential)
                 .buildClient();
     }
 
@@ -47,5 +56,20 @@ public class ServiceBusConfig {
             processorProperties.setAutoComplete(false);
             return processorProperties;
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ServiceBusProducerFactory serviceBusProducerFactory() {
+        NamespaceProperties namespaceProperties = new NamespaceProperties();
+        namespaceProperties.setNamespace(serviceBusNamespace);
+        namespaceProperties.setEntityType(ServiceBusEntityType.QUEUE);
+        return new DefaultServiceBusNamespaceProducerFactory(namespaceProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ServiceBusTemplate serviceBusTemplate(ServiceBusProducerFactory producerFactory) {
+        return new ServiceBusTemplate(producerFactory);
     }
 }
