@@ -47,7 +47,6 @@ public class AwsS3Service implements StorageService {
         BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
 
         return containerClient.listBlobs().stream()
-                .filter(blobItem -> !blobItem.getName().contains("_thumbnail"))
                 .map(blobItem -> {
                     Instant lastModified = blobItem.getProperties().getLastModified() != null
                             ? blobItem.getProperties().getLastModified().toInstant()
