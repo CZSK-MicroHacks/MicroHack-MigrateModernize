@@ -16,7 +16,7 @@ $ScriptVersion = "16.0.0"
 $EnvironmentName = "" # Globally unique! Set your environment name here
 
 if($EnvironmentName -eq "" ) {
-    $EnvironmentName = "lab" + (Get-Date -Format "yyMMddHHmmss")
+    $EnvironmentName = "onprem" # + (Get-Date -Format "yyMMddHHmmss")
 }
 
 
@@ -1333,7 +1333,7 @@ function Invoke-AzureMigrateConfiguration {
 
     # Define all resource names
     $subscriptionId = (Get-AzContext).Subscription.Id
-    $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "${EnvironmentName}-rg" }
+    $resourceGroupName = if ($SkillableEnvironment) { "on-prem" } else { "rg-${EnvironmentName}" }
     $migrateProjectName = "${EnvironmentName}-azm"
     $assessmentProjectName = "${EnvironmentName}asmproject"
     $vmwareSiteName = "${EnvironmentName}vmwaresite"
@@ -1428,7 +1428,7 @@ function Invoke-AzureMigrateConfiguration {
 try {
     Write-Host "Creating $NumberOfEnvironments environment(s)..." -ForegroundColor Cyan
     
-    for ($i = 1; $i -le $NumberOfEnvironments; $i++) {
+    for ($i = 11; $i -le $NumberOfEnvironments; $i++) {
         Write-Host ""
         Write-Host "========================================" -ForegroundColor Green
         Write-Host "Creating Environment $i of $NumberOfEnvironments" -ForegroundColor Green
@@ -1437,7 +1437,7 @@ try {
         
         # Generate unique environment name for each instance
         $currentEnvironmentName = if ($NumberOfEnvironments -gt 1) {
-            "${EnvironmentName}-${i}"
+            "${EnvironmentName}${i}"
         } else {
             $EnvironmentName
         }
