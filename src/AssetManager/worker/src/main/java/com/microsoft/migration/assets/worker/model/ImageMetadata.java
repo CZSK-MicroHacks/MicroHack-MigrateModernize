@@ -1,9 +1,9 @@
 package com.microsoft.migration.assets.worker.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,9 +18,9 @@ public class ImageMetadata {
     private String filename;
     private String contentType;
     private Long size;
-    private String s3Key;
-    private String s3Url;
-    private String thumbnailKey;
+    private String blobName;
+    private String blobUrl;
+    private String thumbnailBlobName;
     private String thumbnailUrl;
     private LocalDateTime uploadedAt;
     private LocalDateTime lastModified;
