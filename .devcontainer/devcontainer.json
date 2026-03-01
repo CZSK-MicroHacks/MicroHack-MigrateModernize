@@ -3,10 +3,10 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "8",
+      "version": "21",
       "installMaven": "true",
       "installGradle": "false",
-      "additionalVersions": "21"
+      "additionalVersions": "8"
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "10.0"
@@ -27,17 +27,17 @@
       "settings": {
         "java.configuration.runtimes": [
           {
-            "name": "JavaSE-1.8",
-            "path": "/usr/local/sdkman/candidates/java/8.0",
+            "name": "JavaSE-21",
+            "path": "/usr/local/sdkman/candidates/java/21.0",
             "default": true
           },
           {
-            "name": "JavaSE-21",
-            "path": "/usr/local/sdkman/candidates/java/21.0"
+            "name": "JavaSE-1.8",
+            "path": "/usr/local/sdkman/candidates/java/8.0"
           }
         ]
       }
     }
   },
-  "postCreateCommand": "echo 'Development environment ready! JDK 8 (default) and JDK 21 available. Use sdk use java <version> to switch.'"
+  "postCreateCommand": "echo 'Development environment ready! JDK 21 (default) and JDK 8 available. Use sdk use java <version> to switch.'"
 }
