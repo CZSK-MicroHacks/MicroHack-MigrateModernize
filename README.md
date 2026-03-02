@@ -195,7 +195,7 @@ Set up Azure Migrate to discover and assess your on-premises infrastructure. You
 2. Navigate to the `onpremXXX-rg` resource group
 3. Connect to the Hyper-V host VM `onpremXXX-vm` (login: `adminuser`, password: `demo!pass123`)
    - User RDP or Azure Bastion
-5. Explore the nested VMs running inside the host
+4. Explore the nested VMs running inside the host
 
 ![Hyper-V Manager showing nested VMs](https://raw.githubusercontent.com/CZSK-MicroHacks/MicroHack-MigrateModernize/refs/heads/main/lab-material/media/00915.png)
 
@@ -409,56 +409,56 @@ Modernize the Asset Manager Java Spring Boot application for Azure deployment, m
 
 **Perform AppCAT Assessment:**
 
-11. Open GitHub Copilot App Modernization extension in the Activity bar
-12. Ensure Claude Sonnet 4.5 is selected as the model
-13. Click "Migrate to Azure" to begin assessment
-14. Wait for AppCAT CLI installation to complete
-15. Review assessment progress in the VS Code terminal
-16. Wait for assessment results
+1. Open GitHub Copilot App Modernization extension in the Activity bar
+2. Ensure Claude Sonnet 4.5 is selected as the model
+3. Click "Migrate to Azure" to begin assessment
+4. Wait for AppCAT CLI installation to complete
+5. Review assessment progress in the VS Code terminal
+6. Wait for assessment results
 
 **Analyze Assessment Results:**
 
-17. Examine issue prioritization:
+7. Examine issue prioritization:
     - Mandatory (Purple) - Critical blocking issues
     - Potential (Blue) - Performance optimizations
     - Optional (Gray) - Future improvements
-18. Click on individual issues to see detailed recommendations
-29. Focus on the AWS S3 to Azure Blob Storage migration finding
+8. Click on individual issues to see detailed recommendations
+9. Focus on the AWS S3 to Azure Blob Storage migration finding
 
 **Execute Guided Migration:**
 
-21. Expand the "Migrate from AWS S3 to Azure Blob Storage" task
-22. Read the explanation of why this migration is important
-23. Click the "Run Task" button to start the migration
-24. Review the generated migration plan in the chat window and `plan.md` file
-25. Type "Continue" in the chat to begin code refactoring
+10. Expand the "Migrate from AWS S3 to Azure Blob Storage" task
+11. Read the explanation of why this migration is important
+12. Click the "Run Task" button to start the migration
+13. Review the generated migration plan in the chat window and `plan.md` file
+14. Type "Continue" in the chat to begin code refactoring
 
 **Monitor Migration Progress:**
 
-26. Watch the GitHub Copilot chat for real-time status updates
-27. Check the `progress.md` file for detailed change logs
-28. Review file modifications as they occur:
-    - `pom.xml` and `build.gradle` updates for Azure SDK dependencies
+15. Watch the GitHub Copilot chat for real-time status updates
+16. Check the `progress.md` file for detailed change logs
+17. Review file modifications as they occur:
+    - `pom.xml` updates for Azure SDK dependencies
     - `application.properties` configuration changes
     - Spring Cloud Azure version properties
-29. Allow any prompted operations during the migration
+18. Allow any prompted operations during the migration
 
 **Validate Migration:**
 
-30. Wait for automated validation to complete:
+19. Wait for automated validation to complete:
     - CVE scanning for security vulnerabilities
     - Build validation
     - Consistency checks
     - Test execution
-31. Review validation results in the chat window
-32. Allow automated fixes if validation issues are detected
-33. Confirm all validation stages pass successfully
+20. Review validation results in the chat window
+21. Allow automated fixes if validation issues are detected
+22. Confirm all validation stages pass successfully
 
 ### Success Criteria
 
 - ✅ AppCAT assessment completed successfully
 - ✅ AWS S3 to Azure Blob Storage migration executed via guided task
-- ✅ Maven/Gradle dependencies updated with Azure SDK
+- ✅ Maven dependencies updated with Azure SDK
 - ✅ Application configuration migrated to Azure Blob Storage
 - ✅ All validation stages pass (CVE, build, consistency, tests)
 
