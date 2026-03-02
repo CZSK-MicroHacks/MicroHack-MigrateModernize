@@ -21,6 +21,7 @@
         "github.copilot",
         "github.copilot-chat",
         "vscjava.migrate-java-to-azure",
+        "ms-dotnettools.vscode-dotnet-modernize",
         "vscjava.vscode-java-pack",
         "ms-dotnettools.csdevkit",
         "ms-azuretools.vscode-docker"
