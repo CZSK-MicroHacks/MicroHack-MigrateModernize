@@ -694,17 +694,20 @@ Configure logging and monitoring for the deployed AssetManager application using
 
 **Set Up the SRE Agent:**
 
-11. Navigate to **Azure Monitor** in the Azure Portal
-12. Open the **SRE agent (preview)** section
-13. Configure the SRE agent:
-    - Select your Application Insights resource as the monitored resource
-    - Configure alert rules and incident detection thresholds
-    - Enable AI-powered root cause analysis
-14. Review the SRE agent capabilities:
+> **Note:** To create an SRE agent, your account needs `Microsoft.Authorization/roleAssignments/write` permission on the subscription. This is typically held by users with the **Owner**, **Role Based Access Control Administrator**, or **User Access Administrator** role.
+
+11. In the Azure Portal, type **SRE agent** in the top search bar and select **SRE agent (preview)**
+12. Click **Create new SRE Agent**
+13. Select or create a resource group for the agent
+14. Choose the permission level for the agent:
+    - **Reader** - read-only access to monitored resources
+    - **Privileged** - pre-assigned monitoring roles (Log Analytics Reader, Monitoring Reader)
+15. Add the resource group containing your Container App and Application Insights to the agent's scope
+16. Review the SRE agent capabilities:
     - Automated incident investigation
     - Root cause analysis with supporting evidence
     - Suggested remediation actions
-15. Test the SRE agent by simulating an issue (e.g., sending requests to a non-existent endpoint) and reviewing the agent's analysis
+17. Test the SRE agent by simulating an issue (e.g., sending requests to a non-existent endpoint) and reviewing the agent's analysis
 
 ### Success Criteria
 
@@ -720,7 +723,8 @@ Configure logging and monitoring for the deployed AssetManager application using
 - [Application Insights for Java](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable?tabs=java)
 - [Container Apps Monitoring](https://learn.microsoft.com/azure/container-apps/observability)
 - [Log Analytics KQL Queries](https://learn.microsoft.com/azure/azure-monitor/logs/get-started-queries)
-- [Azure Monitor SRE Agent](https://learn.microsoft.com/azure/azure-monitor/agents/sre-agent)
+- [Azure SRE Agent - Create and Use](https://learn.microsoft.com/azure/sre-agent/usage)
+- [Azure SRE Agent - Permissions](https://learn.microsoft.com/azure/sre-agent/agent-managed-identity)
 
 ---
 
