@@ -2,11 +2,14 @@
 
 <#
 .SYNOPSIS
-    Creates Azure resource groups and assigns Contributor role for users 001-055.
+    Creates Azure resource groups and assigns roles for users 001-055.
 
 .DESCRIPTION
     This script creates resource groups named rg-userXXX (where XXX is 001-055) and 
-    grants Contributor role to corresponding users UserXXX@MngEnvMCAP346784.onmicrosoft.com.
+    grants the following roles to corresponding users UserXXX@MngEnvMCAP346784.onmicrosoft.com:
+    - Contributor (Azure RBAC - at resource group scope)
+    - User Access Administrator (Azure RBAC - at resource group scope)
+    - Application Developer (Entra ID directory role)
 
 .PARAMETER Location
     The Azure region where resource groups will be created. Default is "swedencentral".
@@ -45,11 +48,29 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# Check if Microsoft.Graph module is installed
+Write-Host "Checking Microsoft.Graph PowerShell module..." -ForegroundColor Cyan
+$graphModule = Get-Module -ListAvailable -Name Microsoft.Graph.Identity.Governance
+if (-not $graphModule) {
+    Write-Host "Microsoft.Graph.Identity.Governance module not found. Installing..." -ForegroundColor Yellow
+    Install-Module -Name Microsoft.Graph.Identity.Governance -Scope CurrentUser -Force -AllowClobber
+}
+
 # Check if logged in to Azure
 Write-Host "Checking Azure login status..." -ForegroundColor Cyan
 $accountInfo = az account show 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Not logged in to Azure. Please run 'az login' first."
+    exit 1
+}
+
+# Connect to Microsoft Graph
+Write-Host "Connecting to Microsoft Graph..." -ForegroundColor Cyan
+try {
+    Connect-MgGraph -TenantId f222e08a-73cb-4a04-8fb3-616c414990f7 -Scopes "RoleManagement.ReadWrite.Directory" -NoWelcome -ErrorAction Stop
+    Write-Host "✓ Connected to Microsoft Graph" -ForegroundColor Green
+} catch {
+    Write-Error "Failed to connect to Microsoft Graph. Please ensure you have appropriate permissions."
     exit 1
 }
 
@@ -101,44 +122,102 @@ for ($i = $StartUser; $i -le $EndUser; $i++) {
             }
         }
         
-        # Assign Contributor role
-        Write-Host "  Assigning Contributor role to: $userName" -ForegroundColor Gray
-        
         # Check if user exists and get object ID
+        Write-Host "  Checking user: $userName" -ForegroundColor Gray
         $userObjectId = az ad user show --id $userName --query id -o tsv 2>$null
         
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "  ✗ Warning: User $userName not found in Azure AD. Skipping role assignment." -ForegroundColor Red
+            Write-Host "  ✗ Warning: User $userName not found in Azure AD. Skipping role assignments." -ForegroundColor Red
             $failures += "User $userNumber - User not found in Azure AD"
             $failureCount++
             continue
         }
         
-        # Create role assignment
+        $rgScope = "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$rgName"
+        
+        # Assign Contributor role
+        Write-Host "  Assigning Contributor role..." -ForegroundColor Gray
         $roleResult = az role assignment create `
             --role "Contributor" `
             --assignee-object-id $userObjectId `
             --assignee-principal-type "User" `
-            --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$rgName" `
+            --scope $rgScope `
             --output none 2>&1
         
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "  ✓ Role assignment completed successfully" -ForegroundColor Green
-            $successCount++
+            Write-Host "  ✓ Contributor role assigned" -ForegroundColor Green
         } else {
-            # Check if assignment already exists
             $existingAssignment = az role assignment list `
                 --assignee $userObjectId `
                 --role "Contributor" `
-                --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$rgName" 2>$null
+                --scope $rgScope 2>$null
             
             if ($existingAssignment -and $existingAssignment -ne "[]") {
-                Write-Host "  ℹ Role assignment already exists" -ForegroundColor Yellow
-                $successCount++
+                Write-Host "  ℹ Contributor role already exists" -ForegroundColor Yellow
             } else {
-                throw "Failed to assign role: $roleResult"
+                throw "Failed to assign Contributor role: $roleResult"
             }
         }
+        
+        # Assign User Access Administrator role
+        Write-Host "  Assigning User Access Administrator role..." -ForegroundColor Gray
+        $uaaRoleResult = az role assignment create `
+            --role "User Access Administrator" `
+            --assignee-object-id $userObjectId `
+            --assignee-principal-type "User" `
+            --scope $rgScope `
+            --output none 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  ✓ User Access Administrator role assigned" -ForegroundColor Green
+        } else {
+            $existingUaaAssignment = az role assignment list `
+                --assignee $userObjectId `
+                --role "User Access Administrator" `
+                --scope $rgScope 2>$null
+            
+            if ($existingUaaAssignment -and $existingUaaAssignment -ne "[]") {
+                Write-Host "  ℹ User Access Administrator role already exists" -ForegroundColor Yellow
+            } else {
+                throw "Failed to assign User Access Administrator role: $uaaRoleResult"
+            }
+        }
+        
+        # Assign Application Developer directory role (Entra ID) using PowerShell
+        Write-Host "  Assigning Application Developer directory role..." -ForegroundColor Gray
+        $appDeveloperRoleId = "cf1c38e5-3621-4004-a7cb-879624dced7c"  # Application Developer role template ID
+        
+        try {
+            # Check if active role assignment already exists
+            $existingDirRole = Get-MgRoleManagementDirectoryRoleAssignment -Filter "principalId eq '$userObjectId' and roleDefinitionId eq '$appDeveloperRoleId'" -ErrorAction SilentlyContinue
+            
+            if ($existingDirRole) {
+                Write-Host "  ℹ Application Developer role already assigned" -ForegroundColor Yellow
+            } else {
+                # Create time-limited role assignment using PIM
+                $scheduleParams = @{
+                    Action = "adminAssign"
+                    Justification = "MicroHack lab access"
+                    RoleDefinitionId = $appDeveloperRoleId
+                    DirectoryScopeId = "/"
+                    PrincipalId = $userObjectId
+                    ScheduleInfo = @{
+                        StartDateTime = (Get-Date).ToUniversalTime()
+                        Expiration = @{
+                            Type = "afterDateTime"
+                            EndDateTime = [DateTime]::Parse("2026-03-31T23:59:59Z")
+                        }
+                    }
+                }
+                
+                $roleAssignment = New-MgRoleManagementDirectoryRoleAssignmentScheduleRequest -BodyParameter $scheduleParams -ErrorAction Stop
+                Write-Host "  ✓ Application Developer role assigned (expires 2026-03-31)" -ForegroundColor Green
+            }
+        } catch {
+            Write-Host "  ⚠ Warning: Failed to assign Application Developer role: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+        
+        $successCount++
         
         Write-Host ""
         
